@@ -6,8 +6,8 @@ Modules
     :depth: 2
 
 
-pvlive
-------
+pvlive_api
+----------
 
 .. automodule:: pvlive_api.pvlive
     :members:
