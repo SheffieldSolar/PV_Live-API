@@ -17,6 +17,7 @@ class PVLiveException(Exception):
         try:
             caller_file = inspect.stack()[2][1]
         except:
+            import os
             caller_file = os.path.basename(__file__)
         self.msg = "%s (in '%s')" % (msg, caller_file)
     def __str__(self):
@@ -83,7 +84,8 @@ class PVLive:
         """
         if not isinstance(dt, datetime) or dt.tzinfo is None:
             PVLiveException("The dt must be a timezone-aware Python datetime object.")
-        dt = dt - timedelta(minutes=dt.minute%30, seconds=dt.second) + timedelta(minutes=30)
+        if not(dt.minute % 30 == 0 and dt.second == 0 and dt.microsecond == 0):
+            dt = dt - timedelta(minutes=dt.minute%30, seconds=dt.second) + timedelta(minutes=30)
         params = self._compile_params(region_id, extra_fields, dt)
         response = self._query_api(params)
         if len(response["data"]) > 0:
@@ -163,6 +165,8 @@ def main():
     """Demo the module's capabilities."""
     pvlive = PVLive()
     print("Latest:", pvlive.latest())
+    print("At 2018-06-03 12:00:", pvlive.at_time(datetime(2018, 6, 3, 12, 0, tzinfo=pytz.utc)))
+    print("At 2018-06-03 12:30:", pvlive.at_time(datetime(2018, 6, 3, 12, 30, tzinfo=pytz.utc)))
     print("At 2018-06-03 12:35:", pvlive.at_time(datetime(2018, 6, 3, 12, 35, tzinfo=pytz.utc)))
     print("Peak on 2018-06-03:", pvlive.day_peak(date(2018, 6, 3)))
 
