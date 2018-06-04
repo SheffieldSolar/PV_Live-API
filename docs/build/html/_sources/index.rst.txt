@@ -9,6 +9,9 @@ Welcome to PV_Live API's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   self
+   modules
 
 
 
