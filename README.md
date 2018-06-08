@@ -4,7 +4,7 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 ### What is this repository for? ###
 
 * A Python interface for the PV_Live web API to enable accessing PV_Live results in Python code.
-* Version 0.1
+* Version 0.2
 
 ### How do I get set up? ###
 
