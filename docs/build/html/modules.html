@@ -1,34 +1,22 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Modules &#8212; PV_Live API 0.1 documentation</title>
-    
+    <title>Modules &#8212; PV_Live API 0.2 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Welcome to PV_Live API’s documentation!" href="index.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -41,7 +29,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to PV_Live API’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PV_Live API 0.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PV_Live API 0.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -79,13 +67,19 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.at_time" title="pvlive_api.pvlive.PVLive.at_time"><code class="xref py py-obj docutils literal"><span class="pre">at_time</span></code></a>(dt[,&nbsp;region_id,&nbsp;extra_fields])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.at_time" title="pvlive_api.pvlive.PVLive.at_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">at_time</span></code></a>(dt[,&nbsp;region_id,&nbsp;extra_fields])</td>
 <td>Get the PV_Live generation result for a given time from the API.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.day_peak" title="pvlive_api.pvlive.PVLive.day_peak"><code class="xref py py-obj docutils literal"><span class="pre">day_peak</span></code></a>(d[,&nbsp;region_id,&nbsp;extra_fields])</td>
+<tr class="row-even"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.between" title="pvlive_api.pvlive.PVLive.between"><code class="xref py py-obj docutils literal notranslate"><span class="pre">between</span></code></a>(start,&nbsp;end[,&nbsp;region_id,&nbsp;extra_fields])</td>
+<td>Get the PV_Live generation result for a given time interval from the API.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.day_energy" title="pvlive_api.pvlive.PVLive.day_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">day_energy</span></code></a>(d[,&nbsp;region_id])</td>
+<td>Get the cumulative PV generation for a given day from the API.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.day_peak" title="pvlive_api.pvlive.PVLive.day_peak"><code class="xref py py-obj docutils literal notranslate"><span class="pre">day_peak</span></code></a>(d[,&nbsp;region_id,&nbsp;extra_fields])</td>
 <td>Get the peak PV_Live generation result for a given day from the API.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.latest" title="pvlive_api.pvlive.PVLive.latest"><code class="xref py py-obj docutils literal"><span class="pre">latest</span></code></a>([region_id,&nbsp;extra_fields])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pvlive_api.pvlive.PVLive.latest" title="pvlive_api.pvlive.PVLive.latest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latest</span></code></a>([region_id,&nbsp;extra_fields])</td>
 <td>Get the latest PV_Live generation result from the API.</td>
 </tr>
 </tbody>
@@ -98,30 +92,117 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>`dt`</strong> : datetime</p>
-<blockquote>
-<div><p>A timezone-aware datetime object. Will be corrected to the END of the half hour in which
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`dt`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">datetime</span></dt>
+<dd><p class="first last">A timezone-aware datetime object. Will be corrected to the END of the half hour in which
 <em>dt</em> falls, since Sheffield Solar use end of interval as convention.</p>
-</div></blockquote>
-<p><strong>`region_id`</strong> : int</p>
-<blockquote>
-<div><p>The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
-</div></blockquote>
-<p><strong>`extra_fields`</strong> : string</p>
-<blockquote>
-<div><p>Comma-separated string listing of the names of any extra fields required.</p>
-</div></blockquote>
-<p><strong>Returns</strong></p>
-<p><strong>&#8212;&#8212;-</strong></p>
-<p><strong>tuple</strong></p>
-<blockquote>
-<div><p>Tuple containing the region_id, datetime_GMT and generation_MW fields of the latest
-PV_Live result, plus any extra_fields in the order specified.</p>
-</div></blockquote>
-<p><strong>Notes</strong></p>
-<p><strong>&#8212;&#8211;</strong></p>
-<p><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></p>
-<p class="last"><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></p>
+</dd>
+<dt><strong>`region_id`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
+</dd>
+<dt><strong>`extra_fields`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Comma-separated string listing of the names of any extra fields required.</p>
+</dd>
+<dt><strong>Returns</strong></dt>
+<dd></dd>
+<dt><strong>——-</strong></dt>
+<dd></dd>
+<dt><strong>tuple</strong></dt>
+<dd><p class="first last">Tuple containing the region_id, datetime_GMT and generation_MW fields of the PV_Live
+result, plus any extra_fields in the order specified.</p>
+</dd>
+<dt><strong>Notes</strong></dt>
+<dd></dd>
+<dt><strong>—–</strong></dt>
+<dd></dd>
+<dt><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></dt>
+<dd></dd>
+<dt><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvlive_api.pvlive.PVLive.between">
+<code class="descname">between</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>region_id=0</em>, <em>extra_fields=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pvlive_api.pvlive.PVLive.between" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the PV_Live generation result for a given time interval from the API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`start`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">datetime</span></dt>
+<dd><p class="first last">A timezone-aware datetime object. Will be corrected to the END of the half hour in which
+<em>start</em> falls, since Sheffield Solar use end of interval as convention.</p>
+</dd>
+<dt><strong>`end`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">datetime</span></dt>
+<dd><p class="first last">A timezone-aware datetime object. Will be corrected to the END of the half hour in which
+<em>end</em> falls, since Sheffield Solar use end of interval as convention.</p>
+</dd>
+<dt><strong>`region_id`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
+</dd>
+<dt><strong>`extra_fields`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Comma-separated string listing of the names of any extra fields required.</p>
+</dd>
+<dt><strong>Returns</strong></dt>
+<dd></dd>
+<dt><strong>——-</strong></dt>
+<dd></dd>
+<dt><strong>list</strong></dt>
+<dd><p class="first last">Each element of the outter list is a list containing the region_id, datetime_GMT and
+generation_MW fields of a PV_Live result, plus any extra_fields in the order specified.</p>
+</dd>
+<dt><strong>Notes</strong></dt>
+<dd></dd>
+<dt><strong>—–</strong></dt>
+<dd></dd>
+<dt><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></dt>
+<dd></dd>
+<dt><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pvlive_api.pvlive.PVLive.day_energy">
+<code class="descname">day_energy</code><span class="sig-paren">(</span><em>d</em>, <em>region_id=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pvlive_api.pvlive.PVLive.day_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the cumulative PV generation for a given day from the API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`d`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">date</span></dt>
+<dd><p class="first last">The day of interest as a date object.</p>
+</dd>
+<dt><strong>`region_id`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
+</dd>
+<dt><strong>Returns</strong></dt>
+<dd></dd>
+<dt><strong>——-</strong></dt>
+<dd></dd>
+<dt><strong>float</strong></dt>
+<dd><p class="first last">The cumulative PV generation on the given day in MWh.</p>
+</dd>
+<dt><strong>Notes</strong></dt>
+<dd></dd>
+<dt><strong>—–</strong></dt>
+<dd></dd>
+<dt><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></dt>
+<dd></dd>
+<dt><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -136,29 +217,33 @@ PV_Live result, plus any extra_fields in the order specified.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>`d`</strong> : date</p>
-<blockquote>
-<div><p>The day of interest as a date object.</p>
-</div></blockquote>
-<p><strong>`region_id`</strong> : int</p>
-<blockquote>
-<div><p>The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
-</div></blockquote>
-<p><strong>`extra_fields`</strong> : string</p>
-<blockquote>
-<div><p>Comma-separated string listing of the names of any extra fields required.</p>
-</div></blockquote>
-<p><strong>Returns</strong></p>
-<p><strong>&#8212;&#8212;-</strong></p>
-<p><strong>tuple</strong></p>
-<blockquote>
-<div><p>Tuple containing the region_id, datetime_GMT and generation_MW fields of the latest
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`d`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">date</span></dt>
+<dd><p class="first last">The day of interest as a date object.</p>
+</dd>
+<dt><strong>`region_id`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
+</dd>
+<dt><strong>`extra_fields`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Comma-separated string listing of the names of any extra fields required.</p>
+</dd>
+<dt><strong>Returns</strong></dt>
+<dd></dd>
+<dt><strong>——-</strong></dt>
+<dd></dd>
+<dt><strong>tuple</strong></dt>
+<dd><p class="first last">Tuple containing the region_id, datetime_GMT and generation_MW fields of the latest
 PV_Live result, plus any extra_fields in the order specified.</p>
-</div></blockquote>
-<p><strong>Notes</strong></p>
-<p><strong>&#8212;&#8211;</strong></p>
-<p><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></p>
-<p class="last"><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></p>
+</dd>
+<dt><strong>Notes</strong></dt>
+<dd></dd>
+<dt><strong>—–</strong></dt>
+<dd></dd>
+<dt><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></dt>
+<dd></dd>
+<dt><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -173,25 +258,30 @@ PV_Live result, plus any extra_fields in the order specified.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>`region_id`</strong> : int</p>
-<blockquote>
-<div><p>The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
-</div></blockquote>
-<p><strong>`extra_fields`</strong> : string</p>
-<blockquote>
-<div><p>Comma-separated string listing of the names of any extra fields required.</p>
-</div></blockquote>
-<p><strong>Returns</strong></p>
-<p><strong>&#8212;&#8212;-</strong></p>
-<p><strong>tuple</strong></p>
-<blockquote>
-<div><p>Tuple containing the region_id, datetime_GMT and generation_MW fields of the latest
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`region_id`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The numerical ID of the region of interest. Defaults to 0 (i.e. national).</p>
+</dd>
+<dt><strong>`extra_fields`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Comma-separated string listing of the names of any extra fields required.</p>
+</dd>
+<dt><strong>Returns</strong></dt>
+<dd></dd>
+<dt><strong>——-</strong></dt>
+<dd></dd>
+<dt><strong>tuple</strong></dt>
+<dd><p class="first last">Tuple containing the region_id, datetime_GMT and generation_MW fields of the latest
 PV_Live result, plus any extra_fields in the order specified.</p>
-</div></blockquote>
-<p><strong>Notes</strong></p>
-<p><strong>&#8212;&#8211;</strong></p>
-<p><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></p>
-<p class="last"><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></p>
+</dd>
+<dt><strong>Notes</strong></dt>
+<dd></dd>
+<dt><strong>—–</strong></dt>
+<dd></dd>
+<dt><strong>For list of optional *extra_fields*, see `PV_Live API Docs</strong></dt>
+<dd></dd>
+<dt><strong>&lt;https://www.solar.sheffield.ac.uk/pvlive/api/&gt;`_.</strong></dt>
+<dd></dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -203,14 +293,14 @@ PV_Live result, plus any extra_fields in the order specified.</p>
 <dl class="exception">
 <dt id="pvlive_api.pvlive.PVLiveException">
 <em class="property">exception </em><code class="descclassname">pvlive_api.pvlive.</code><code class="descname">PVLiveException</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#pvlive_api.pvlive.PVLiveException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.Exception</span></code></p>
 <p>An Exception specific to the PVLive class.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pvlive_api.pvlive.main">
 <code class="descclassname">pvlive_api.pvlive.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pvlive_api.pvlive.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Demo the module&#8217;s capabilities.</p>
+<dd><p>Demo the module’s capabilities.</p>
 </dd></dl>
 
 </div>
@@ -232,7 +322,7 @@ PV_Live result, plus any extra_fields in the order specified.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to PV_Live API&#8217;s documentation!</a></p>
+                        title="previous chapter">Welcome to PV_Live API’s documentation!</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -242,12 +332,14 @@ PV_Live result, plus any extra_fields in the order specified.</p>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -266,12 +358,12 @@ PV_Live result, plus any extra_fields in the order specified.</p>
         <li class="right" >
           <a href="index.html" title="Welcome to PV_Live API’s documentation!"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PV_Live API 0.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PV_Live API 0.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Jamie Taylor.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
     </div>
   </body>
 </html>
