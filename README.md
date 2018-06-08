@@ -13,7 +13,7 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 
 ### Documentation ###
 
-* [Documentation](https://sheffieldsolar.github.io/PV_Live-API/)
+* [https://sheffieldsolar.github.io/PV_Live-API/](https://sheffieldsolar.github.io/PV_Live-API/)
 
 ### How do I update? ###
 
