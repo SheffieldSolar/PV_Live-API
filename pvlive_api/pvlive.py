@@ -25,15 +25,16 @@ class PVLiveException(Exception):
         return self.msg
 
 class PVLive:
-    """Interface with the PV_Live web API."""
+    """
+    Interface with the PV_Live web API.
+    
+    Parameters
+    ----------
+    `retries` : int
+        Optionally specify the number of retries to use should the API respond with anything
+        other than status code 200. Exponential back-off applies inbetween retries.
+    """
     def __init__(self, retries=3):
-        """
-        Parameters
-        ----------
-        `retries` : int
-            Optionally specify the number of retries to use should the API respond with anything
-            other than status code 200. Exponential back-off applies inbetween retries.
-        """
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/v1"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries

@@ -60,6 +60,20 @@
 <dt id="pvlive_api.pvlive.PVLive">
 <em class="property">class </em><code class="descclassname">pvlive_api.pvlive.</code><code class="descname">PVLive</code><span class="sig-paren">(</span><em>retries=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pvlive_api.pvlive.PVLive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface with the PV_Live web API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>`retries`</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Optionally specify the number of retries to use should the API respond with anything
+other than status code 200. Exponential back-off applies inbetween retries.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
 <colgroup>
