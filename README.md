@@ -30,6 +30,7 @@ pvl.latest()
 ### How do I update? ###
 
 Sheffield Solar will endeavour to update this library in sync with the [PV_Live API](https://www.solar.sheffield.ac.uk/pvlive/api/ "PV_Live API webpage"). To make sure you are forewarned of upcoming changes to the API, you should email [solar@sheffield.ac.uk](mailto:solar@sheffield.ac.uk?subject=PV_Live%20API%20email%20updates "Email Sheffield Solar") and request to be added to the PV_Live user mailing list.
+
 To upgrade the code:
 * Run `pip install --upgrade git+https://github.com/SheffieldSolar/PV_Live-API`
 
