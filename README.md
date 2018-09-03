@@ -34,10 +34,6 @@ Sheffield Solar will endeavour to update this library in sync with the [PV_Live 
 To upgrade the code:
 * Run `pip install --upgrade git+https://github.com/SheffieldSolar/PV_Live-API`
 
-### Contribution guidelines ###
-
-* To Do
-
 ### Who do I talk to? ###
 
 * Jamie Taylor - [jamie.taylor@sheffield.ac.uk](mailto:jamie.taylor@sheffield.ac.uk "Email Jamie") - [SheffieldSolar](https://github.com/SheffieldSolar)
