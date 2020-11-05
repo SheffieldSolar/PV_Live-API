@@ -43,7 +43,7 @@ To upgrade the code:
 ## Authors ##
 
 * **Jamie Taylor** - *Initial work* - [SheffieldSolar](https://github.com/SheffieldSolar)
-* **Ethan Jones - [SheffieldSolar](https://github.com/SheffieldSolar)
+* **Ethan Jones** - [SheffieldSolar](https://github.com/SheffieldSolar)
 
 ## License ##
 
