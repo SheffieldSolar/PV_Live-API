@@ -85,6 +85,7 @@ setup(
     install_requires=[
         "requests",
         "pytz",
+        "pandas",
     ],
 
     # List additional groups of dependencies here (e.g. development

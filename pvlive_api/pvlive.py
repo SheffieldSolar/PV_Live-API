@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, date, time
 from time import sleep
 import pytz
 import requests
-import pandas as pd 
+import pandas as pd
 
 class PVLiveException(Exception):
     """An Exception specific to the PVLive class."""
@@ -42,7 +42,7 @@ class PVLive:
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
 
-    def latest(self, pes_id=0, data_frame=False, extra_fields=""):
+    def latest(self, pes_id=0, extra_fields="", dataframe=False):
         """
         Get the latest PV_Live generation result from the API.
 
@@ -50,21 +50,19 @@ class PVLive:
         ----------
         `pes_id` : int
             The numerical ID of the PES region of interest. Defaults to 0 (i.e. national).
-        data_frame` : boolean
-            Boolean indicator whether to return data as a dataframe or not.
         `extra_fields` : string
             Comma-separated string listing of the names of any extra fields required.
+        `dataframe` : boolean
+            Boolean indicator whether to return data as a Python DataFrame.
         Returns
         -------
         tuple
             Tuple containing the pes_id, datetime_GMT and generation_MW fields of the latest
             PV_Live result, plus any extra_fields in the order specified.
-            
-            OR
-            
-        dataframe
-            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW fields of a PV_Live
-            result, plus any extra_fields in the order specified.
+        OR
+        Pandas DataFrame
+            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW
+            fields of a PV_Live result, plus any extra_fields in the order specified.
         Notes
         -----
         For list of optional *extra_fields*, see `PV_Live API Docs
@@ -77,12 +75,12 @@ class PVLive:
         params = self._compile_params(extra_fields)
         response = self._query_api(pes_id, params)
         if response["data"]:
-            if data_frame:
-                return self.convert_tuple_to_df(response["data"][0], response['meta'])
+            if dataframe:
+                return self._convert_tuple_to_df(response["data"][0], response['meta'])
             return tuple(response["data"][0])
         return (None, None, None)
 
-    def at_time(self, dt, pes_id=0, data_frame=False, extra_fields=""):
+    def at_time(self, dt, pes_id=0, dataframe=False, extra_fields=""):
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -93,38 +91,36 @@ class PVLive:
             *dt* falls, since Sheffield Solar use end of interval as convention.
         `pes_id` : int
             The numerical ID of the PES region of interest. Defaults to 0 (i.e. national).
-        `data_frame` : boolean
-            Boolean indicator whether to return data as a dataframe or not.
         `extra_fields` : string
             Comma-separated string listing of the names of any extra fields required.
+        `dataframe` : boolean
+            Boolean indicator whether to return data as a Python DataFrame.
         Returns
         -------
         tuple
             Tuple containing the pes_id, datetime_GMT and generation_MW fields of the PV_Live
             result, plus any extra_fields in the order specified.
-            
-            OR
-            
-        dataframe
-            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW fields of a PV_Live
-            result, plus any extra_fields in the order specified.
+        OR
+        Pandas DataFrame
+            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW
+            fields of a PV_Live result, plus any extra_fields in the order specified.
         Notes
         -----
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         if not isinstance(dt, datetime) or dt.tzinfo is None:
-            PVLiveException("The dt must be a timezone-aware Python datetime object.")
+            raise PVLiveException("The dt must be a timezone-aware Python datetime object.")
         dt = self._nearest_hh(dt)
         params = self._compile_params(extra_fields, dt)
         response = self._query_api(pes_id, params)
         if response["data"]:
-            if data_frame:
-                return self.convert_tuple_to_df(response["data"][0], response['meta'])
+            if dataframe:
+                return self._convert_tuple_to_df(response["data"][0], response['meta'])
             return tuple(response["data"][0])
         return (None, None, None)
 
-    def between(self, start, end, pes_id=0, data_frame=False, extra_fields=""):
+    def between(self, start, end, pes_id=0, dataframe=False, extra_fields=""):
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -138,21 +134,19 @@ class PVLive:
             *end* falls, since Sheffield Solar use end of interval as convention.
         `pes_id` : int
             The numerical ID of the PES region of interest. Defaults to 0 (i.e. national).
-        `data_frame` : boolean
-            Boolean indicator whether to return data as a dataframe or not.
         `extra_fields` : string
             Comma-separated string listing of the names of any extra fields required.
+        `dataframe` : boolean
+            Boolean indicator whether to return data as a Python DataFrame.
         Returns
         -------
         list
             Each element of the outter list is a list containing the pes_id, datetime_GMT and
             generation_MW fields of a PV_Live result, plus any extra_fields in the order specified.
-            
-            OR
-            
-        dataframe
-            Each row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW fields of a PV_Live
-            result, plus any extra_fields in the order specified.
+        OR
+        Pandas DataFrame
+            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW
+            fields of a PV_Live result, plus any extra_fields in the order specified.
         Notes
         -----
         For list of optional *extra_fields*, see `PV_Live API Docs
@@ -161,24 +155,26 @@ class PVLive:
         type_check = not (isinstance(start, datetime) and isinstance(end, datetime))
         tz_check = start.tzinfo is None or end.tzinfo is None
         if type_check or tz_check:
-            PVLiveException("Start and end must be timezone-aware Python datetime objects.")
+            raise PVLiveException("Start and end must be timezone-aware Python datetime objects.")
+        if end < start:
+            raise PVLiveException("Start must be later than end.")
         start = self._nearest_hh(start)
         end = self._nearest_hh(end)
         data = []
         request_start = start
         max_range = self.max_range["national"] if pes_id == 0 else self.max_range["regional"]
-        while request_start < end:
+        while request_start <= end:
             request_end = min(end, request_start + max_range)
             params = self._compile_params(extra_fields, request_start, request_end)
             response = self._query_api(pes_id, params)
             data += response["data"]
             request_start += max_range + timedelta(minutes=30)
-        if data_frame:
+        if dataframe:
             columns = response['meta']
             data = pd.DataFrame(data, columns=columns)
         return data
 
-    def day_peak(self, d, pes_id=0, data_frame=False, extra_fields=""):
+    def day_peak(self, d, pes_id=0, dataframe=False, extra_fields=""):
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -188,28 +184,26 @@ class PVLive:
             The day of interest as a date object.
         `pes_id` : int
             The numerical ID of the PES region of interest. Defaults to 0 (i.e. national).
-        `data_frame` : boolean
-            Boolean indicator whether to return data as a dataframe or not.
         `extra_fields` : string
             Comma-separated string listing of the names of any extra fields required.
+        `dataframe` : boolean
+            Boolean indicator whether to return data as a Python DataFrame.
         Returns
         -------
         tuple
             Tuple containing the pes_id, datetime_GMT and generation_MW fields of the latest
             PV_Live result, plus any extra_fields in the order specified.
-            
-            OR
-            
-        dataframe
-            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW fields of a PV_Live
-            result, plus any extra_fields in the order specified.
+        OR
+        Pandas DataFrame
+            The row of the dataframe contains the columns pes_id, datetime_GMT and generation_MW
+            fields of a PV_Live result, plus any extra_fields in the order specified.
         Notes
         -----
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         if not isinstance(d, date):
-            PVLiveException("The d must be a Python date object.")
+            raise PVLiveException("The d must be a Python date object.")
         start = datetime.combine(d, time(0, 30, tzinfo=pytz.UTC))
         end = start + timedelta(days=1) - timedelta(minutes=30)
         params = self._compile_params(extra_fields, start, end)
@@ -217,8 +211,8 @@ class PVLive:
         if response["data"]:
             gens = [x[2] if x[2] is not None else -1e308 for x in response["data"]]
             index_max = max(range(len(gens)), key=gens.__getitem__)
-            if data_frame:
-                return self.convert_tuple_to_df(response["data"][index_max], response['meta'])
+            if dataframe:
+                return self._convert_tuple_to_df(response["data"][index_max], response['meta'])
             return tuple(response["data"][index_max])
         return (None, None, None)
 
@@ -242,7 +236,7 @@ class PVLive:
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         if not isinstance(d, date):
-            PVLiveException("The d must be a Python date object.")
+            raise PVLiveException("The d must be a Python date object.")
         start = datetime.combine(d, time(0, 30, tzinfo=pytz.UTC))
         end = start + timedelta(days=1) - timedelta(minutes=30)
         params = self._compile_params("", start, end)
@@ -270,9 +264,11 @@ class PVLive:
         # print(url)
         return self._fetch_url(url)
 
-    def convert_tuple_to_df(self, data, columns):
+    def _convert_tuple_to_df(self, data, columns):
         """Converts a tuple of values to a data-frame object."""
         df = pd.DataFrame([data], columns=columns)
+        if "datetime_gmt" in df.columns:
+            df.datetime_gmt = pd.to_datetime(df.datetime_gmt)
         return df
 
     def _build_url(self, pes_id, params):
