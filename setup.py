@@ -22,7 +22,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.3",
+    version="0.4",
 
     description="A Python interface for the PV_Live web API from Sheffield Solar.",
     long_description=long_description,
@@ -85,6 +85,7 @@ setup(
     install_requires=[
         "requests",
         "pytz",
+        "pandas",
     ],
 
     # List additional groups of dependencies here (e.g. development
