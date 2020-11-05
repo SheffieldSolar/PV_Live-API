@@ -80,7 +80,7 @@ class PVLive:
             return tuple(response["data"][0])
         return (None, None, None)
 
-    def at_time(self, dt, pes_id=0, dataframe=False, extra_fields=""):
+    def at_time(self, dt, pes_id=0, extra_fields="", dataframe=False):
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -120,7 +120,7 @@ class PVLive:
             return tuple(response["data"][0])
         return (None, None, None)
 
-    def between(self, start, end, pes_id=0, dataframe=False, extra_fields=""):
+    def between(self, start, end, pes_id=0, extra_fields="", dataframe=False):
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -174,7 +174,7 @@ class PVLive:
             data = pd.DataFrame(data, columns=columns)
         return data
 
-    def day_peak(self, d, pes_id=0, dataframe=False, extra_fields=""):
+    def day_peak(self, d, pes_id=0, extra_fields="", dataframe=False):
         """
         Get the peak PV_Live generation result for a given day from the API.
 
