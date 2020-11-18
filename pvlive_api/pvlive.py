@@ -75,9 +75,10 @@ class PVLive:
         params = self._compile_params(extra_fields)
         response = self._query_api(pes_id, params)
         if response["data"]:
+            data = tuple(response["data"][0])
             if dataframe:
-                return self._convert_tuple_to_df(response["data"][0], response['meta'])
-            return tuple(response["data"][0])
+                return self._convert_tuple_to_df(data, response['meta'])
+            return data
         return (None, None, None)
 
     def at_time(self, dt, pes_id=0, extra_fields="", dataframe=False):
@@ -115,9 +116,10 @@ class PVLive:
         params = self._compile_params(extra_fields, dt)
         response = self._query_api(pes_id, params)
         if response["data"]:
+            data = tuple(response["data"][0])
             if dataframe:
-                return self._convert_tuple_to_df(response["data"][0], response['meta'])
-            return tuple(response["data"][0])
+                return self._convert_tuple_to_df(data, response['meta'])
+            return data
         return (None, None, None)
 
     def between(self, start, end, pes_id=0, extra_fields="", dataframe=False):
@@ -171,7 +173,7 @@ class PVLive:
             request_start += max_range + timedelta(minutes=30)
         if dataframe:
             columns = response['meta']
-            data = pd.DataFrame(data, columns=columns)
+            data = self._convert_tuple_to_df(data, columns)
         return data
 
     def day_peak(self, d, pes_id=0, extra_fields="", dataframe=False):
@@ -211,9 +213,10 @@ class PVLive:
         if response["data"]:
             gens = [x[2] if x[2] is not None else -1e308 for x in response["data"]]
             index_max = max(range(len(gens)), key=gens.__getitem__)
+            data = tuple(response["data"][index_max])
             if dataframe:
-                return self._convert_tuple_to_df(response["data"][index_max], response['meta'])
-            return tuple(response["data"][index_max])
+                return self._convert_tuple_to_df(data, response['meta'])
+            return data
         return (None, None, None)
 
     def day_energy(self, d, pes_id=0):
@@ -266,7 +269,8 @@ class PVLive:
 
     def _convert_tuple_to_df(self, data, columns):
         """Converts a tuple of values to a data-frame object."""
-        df = pd.DataFrame([data], columns=columns)
+        data = [data] if type(data) == tuple else data
+        df = pd.DataFrame(data, columns=columns)
         if "datetime_gmt" in df.columns:
             df.datetime_gmt = pd.to_datetime(df.datetime_gmt)
         return df
