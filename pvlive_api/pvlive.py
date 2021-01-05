@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, date, time
 from time import sleep
 import pytz
 import requests
+import numpy as np
 import pandas as pd
 
 class PVLiveException(Exception):
@@ -42,14 +43,14 @@ class PVLive:
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
 
-    def latest(self, region_type=0, region_id=0, extra_fields="", dataframe=False):
+    def latest(self, region_type="pes", region_id=0, extra_fields="", dataframe=False):
         """
         Get the latest PV_Live generation result from the API.
 
         Parameters
         ----------
-        `region_type` : int
-            The numerical ID of the region type of interest. Defaults to 0 (i.e. pes).
+        `region_type` : string
+            The region type of interest. Defaults to pes.
         `region_id` : int
             The numerical ID of the region of interest. Defaults to 0.
         `extra_fields` : string
@@ -70,14 +71,14 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        if not isinstance (region_type, int):
-            raise PVLiveException("The region_type must be a integer.")
+        if not isinstance (region_type, str):
+            raise PVLiveException("The region_type must be a string.")
         if not isinstance(extra_fields, str):
             raise PVLiveException("The extra_fields must be a comma-separated string.")
-        if region_type == 0:
+        if region_type == "pes":
             if region_id != 0 and region_id not in range(10, 24):
                     raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) or 0 (For national).")
-        elif region_type == 1:
+        elif region_type == "gsp":
                 if region_id not in range(0, 328):
                     raise PVLiveException("The pes_id must be an integer between 0 and 327 (inclusive).")
         params = self._compile_params(extra_fields)
@@ -89,7 +90,7 @@ class PVLive:
             return data
         return (None, None, None)
 
-    def at_time(self, dt, region_type=0, region_id=0, extra_fields="", dataframe=False):
+    def at_time(self, dt, region_type="pes", region_id=0, extra_fields="", dataframe=False):
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -98,8 +99,8 @@ class PVLive:
         `dt` : datetime
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *dt* falls, since Sheffield Solar use end of interval as convention.
-        `region_type` : int
-            The numerical ID of the region type of interest. Defaults to 0 (i.e. pes).
+        `region_type` : string
+            The region type of interest. Defaults to pes.
         `region_id` : int
             The numerical ID of the region of interest. Defaults to 0.
         `extra_fields` : string
@@ -120,12 +121,12 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        if not isinstance (region_type, int):
-            raise PVLiveException("The region_type must be a integer.")
-        if region_type == 0:
+        if not isinstance (region_type, str):
+            raise PVLiveException("The region_type must be a string.")
+        if region_type == "pes":
             if region_id != 0 and region_id not in range(10, 24):
                     raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) or 0 (For national).")
-        elif region_type == 1:
+        elif region_type == "gsp":
                 if region_id not in range(0, 328):
                     raise PVLiveException("The pes_id must be an integer between 0 and 327 (inclusive).")
         if not isinstance(dt, datetime) or dt.tzinfo is None:
@@ -140,7 +141,7 @@ class PVLive:
             return data
         return (None, None, None)
 
-    def between(self, start, end, region_type=0, region_id=0, extra_fields="", dataframe=False):
+    def between(self, start, end, region_type="pes", region_id=0, extra_fields="", dataframe=False):
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -152,8 +153,8 @@ class PVLive:
         `end` : datetime
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *end* falls, since Sheffield Solar use end of interval as convention.
-        `region_type` : int
-            The numerical ID of the region type of interest. Defaults to 0 (i.e. pes).
+        `region_type` : string
+            The region type of interest. Defaults to pes.
         `region_id` : int
             The numerical ID of the region of interest. Defaults to 0.
         `extra_fields` : string
@@ -174,12 +175,12 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        if not isinstance (region_type, int):
-            raise PVLiveException("The region_type must be a integer.")
-        if region_type == 0:
+        if not isinstance (region_type, str):
+            raise PVLiveException("The region_type must be a string.")
+        if region_type == "pes":
             if region_id != 0 and region_id not in range(10, 24):
                     raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) or 0 (For national).")
-        elif region_type == 1:
+        elif region_type == "gsp":
                 if region_id not in range(0, 328):
                     raise PVLiveException("The pes_id must be an integer between 0 and 327 (inclusive).")
         type_check = not (isinstance(start, datetime) and isinstance(end, datetime))
@@ -204,7 +205,7 @@ class PVLive:
             data = self._convert_tuple_to_df(data, columns)
         return data
 
-    def day_peak(self, d, region_type=0, region_id=0, extra_fields="", dataframe=False):
+    def day_peak(self, d, region_type="pes", region_id=0, extra_fields="", dataframe=False):
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -212,8 +213,8 @@ class PVLive:
         ----------
         `d` : date
             The day of interest as a date object.
-        `region_type` : int
-            The numerical ID of the region type of interest. Defaults to 0 (i.e. pes).
+        `region_type` : string
+            The region type of interest. Defaults to pes.
         `region_id` : int
             The numerical ID of the region of interest. Defaults to 0.
         `extra_fields` : string
@@ -234,12 +235,12 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        if not isinstance (region_type, int):
-            raise PVLiveException("The region_type must be a integer.")
-        if region_type == 0:
+        if not isinstance (region_type, str):
+            raise PVLiveException("The region_type must be a string.")
+        if region_type == "pes":
             if region_id != 0 and region_id not in range(10, 24):
                     raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) or 0 (For national).")
-        elif region_type == 1:
+        elif region_type == "gsp":
                 if region_id not in range(0, 328):
                     raise PVLiveException("The pes_id must be an integer between 0 and 327 (inclusive).")
         if not isinstance(d, date):
@@ -257,7 +258,7 @@ class PVLive:
             return data
         return (None, None, None)
 
-    def day_energy(self, d, region_type=0, region_id=0):
+    def day_energy(self, d, region_type="pes", region_id=0):
         """
         Get the cumulative PV generation for a given day from the API.
 
@@ -265,8 +266,8 @@ class PVLive:
         ----------
         `d` : date
             The day of interest as a date object.
-        `region_type` : int
-            The numerical ID of the region type of interest. Defaults to 0 (i.e. pes).
+        `region_type` : string
+            The region type of interest. Defaults to pes.
         `region_id` : int
             The numerical ID of the region of interest. Defaults to 0.
         Returns
@@ -278,12 +279,12 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        if not isinstance (region_type, int):
-            raise PVLiveException("The region_type must be a integer.")
-        if region_type == 0:
+        if not isinstance (region_type, str):
+            raise PVLiveException("The region_type must be a string.")
+        if region_type == "pes":
             if region_id != 0 and region_id not in range(10, 24):
                     raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) or 0 (For national).")
-        elif region_type == 1:
+        elif region_type == "gsp":
                 if region_id not in range(0, 328):
                     raise PVLiveException("The pes_id must be an integer between 0 and 327 (inclusive).")
         if not isinstance(d, date):
@@ -317,6 +318,7 @@ class PVLive:
     def _convert_tuple_to_df(self, data, columns):
         """Converts a tuple of values to a data-frame object."""
         data = [data] if type(data) == tuple else data
+        data = [tuple(np.nan if d is None else d for d in t) for t in data]
         df = pd.DataFrame(data, columns=columns)
         if "datetime_gmt" in df.columns:
             df.datetime_gmt = pd.to_datetime(df.datetime_gmt)
@@ -324,10 +326,7 @@ class PVLive:
 
     def _build_url(self, region_type, region_id, params):
         """Construct the appropriate URL for a given set of parameters."""
-        if region_type == 0:
-            base_url = "{}{}/{}".format(self.base_url, "pes", region_id)
-        elif region_type == 1:
-            base_url = "{}{}/{}".format(self.base_url, "gsp", region_id)
+        base_url = "{}{}/{}".format(self.base_url, region_type, region_id)
         url = base_url + "?" + "&".join(["{}={}".format(k, params[k]) for k in params])
         return url
 
@@ -367,21 +366,21 @@ def main():
     print("\nLatest: ")
     print(pvlive.latest())
     print("\nAs Pandas Dataframe: ")
-    print(pvlive.latest(region_type=0, region_id=13, dataframe=True))
+    print(pvlive.latest(region_type="pes", region_id=13, dataframe=True))
     print("\nAt 2018-06-03 12:00: ")
-    print(pvlive.at_time(datetime(2018, 6, 3, 12, 0, tzinfo=pytz.utc), region_type=1, region_id=123))
+    print(pvlive.at_time(datetime(2018, 6, 3, 12, 0, tzinfo=pytz.utc), region_type="gsp", region_id=123))
     print("\nAt 2018-06-03 12:35: ")
     print(pvlive.at_time(datetime(2018, 6, 3, 12, 35, tzinfo=pytz.utc)))
     print("\nAs Pandas Dataframe object: ")
     print(pvlive.at_time(datetime(2018, 6, 3, 12, 35, tzinfo=pytz.utc), dataframe=True))
     print("\nBetween 2018-06-03 12:20 and 2018-06-03 14:00 as a DataFrame object: ")
     print(pvlive.between(datetime(2018, 6, 3, 12, 20, tzinfo=pytz.utc),
-                         datetime(2018, 6, 3, 14, 00, tzinfo=pytz.utc), region_type=1, region_id=59, dataframe=True, extra_fields="ucl_mw,stats_error"))
+                         datetime(2018, 6, 3, 14, 00, tzinfo=pytz.utc), region_type="gsp", region_id=59, dataframe=True, extra_fields="ucl_mw,stats_error"))
     print("\nBetween 2018-07-02 12:20 and 2018-07-03 14:00: ")
     print(pvlive.between(datetime(2018, 7, 3, 12, 20, tzinfo=pytz.utc),
-                         datetime(2018, 7, 3, 14, 00, tzinfo=pytz.utc), region_type=1, region_id=59, extra_fields="ucl_mw,stats_error"))
+                         datetime(2018, 7, 3, 14, 00, tzinfo=pytz.utc), region_type="gsp", region_id=59, extra_fields="ucl_mw,stats_error"))
     print("\nPeak on 2018-06-03 as Pandas Dataframe object: ")
-    print(pvlive.day_peak(date(2018, 6, 3), region_type=0, region_id=14, dataframe=True, extra_fields="ucl_mw"))
+    print(pvlive.day_peak(date(2018, 6, 3), region_type="pes", region_id=14, dataframe=True, extra_fields="ucl_mw"))
     print("\nCumulative generation on 2018-06-03: ")
     print(pvlive.day_energy(date(2018, 6, 3)))
 
