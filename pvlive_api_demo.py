@@ -29,10 +29,10 @@ def main():
     print(pvlive.at_time(datetime(2019, 3, 18, 12, 35, tzinfo=pytz.utc)))
     print("\nBetween 2019-03-18 10:30 and 2019-03-18 14:00: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc)))
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc)))
     print("\nBetween 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc), dataframe=True))
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), dataframe=True))
     print("\nPeak on 2019-03-18: ")
     print(pvlive.day_peak(date(2019, 3, 18)))
     print("\nPeak on 2019-03-18 as a Pandas DataFrame object: ")
@@ -40,57 +40,57 @@ def main():
     print("\nCumulative generation on 2019-03-18: ")
     print(pvlive.day_energy(date(2019, 3, 18)))
 
-    print("\n\n---------- REGIONAL - PES REGION 22 ----------")
-    print("\nLatest PES region 22: ")
-    print(pvlive.latest(region_type="pes", region_id=22))
-    print("\nLatest PES region 22 as a Pandas DataFrame object: ")
-    print(pvlive.latest(region_type="pes", region_id=22, dataframe=True))
-    print("\nPES region 22 at 2019-03-18 12:00: ")
-    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), region_type="pes",
-                         region_id=22))
-    print("\nPES region 22 at 2019-03-18 12:00 as a Pandas DataFrame object: ")
-    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), region_type="pes",
-                         region_id=22, dataframe=True))
-    print("\nPES region 22 between 2019-03-18 10:30 and 2019-03-18 14:00: ")
+    print("\n\n---------- REGIONAL - PES REGION 23 ----------")
+    print("\nLatest PES region 23: ")
+    print(pvlive.latest(entity_type="pes", entity_id=23))
+    print("\nLatest PES region 23 as a Pandas DataFrame object: ")
+    print(pvlive.latest(entity_type="pes", entity_id=23, dataframe=True))
+    print("\nPES region 23 at 2019-03-18 12:00: ")
+    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), entity_type="pes",
+                         entity_id=23))
+    print("\nPES region 23 at 2019-03-18 12:00 as a Pandas DataFrame object: ")
+    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), entity_type="pes",
+                         entity_id=23, dataframe=True))
+    print("\nPES region 23 between 2019-03-18 10:30 and 2019-03-18 14:00: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc), region_type="pes",
-                         region_id=22))
-    print("\nPES region 22 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="pes",
+                         entity_id=23))
+    print("\nPES region 23 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc), region_type="pes",
-                         region_id=22, dataframe=True))
-    print("\nPES region 22 peak on 2019-03-18: ")
-    print(pvlive.day_peak(date(2019, 3, 18), region_type="pes", region_id=22))
-    print("\nPES region 22 peak on 2019-03-18 as a Pandas DataFrame object: ")
-    print(pvlive.day_peak(date(2019, 3, 18), region_type="pes", region_id=22, dataframe=True))
-    print("\nPES region 22 cumulative generation on 2019-03-18: ")
-    print(pvlive.day_energy(date(2019, 3, 18), region_type="pes", region_id=22))
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="pes",
+                         entity_id=23, dataframe=True))
+    print("\nPES region 23 peak on 2019-03-18: ")
+    print(pvlive.day_peak(date(2019, 3, 18), entity_type="pes", entity_id=23))
+    print("\nPES region 23 peak on 2019-03-18 as a Pandas DataFrame object: ")
+    print(pvlive.day_peak(date(2019, 3, 18), entity_type="pes", entity_id=23, dataframe=True))
+    print("\nPES region 23 cumulative generation on 2019-03-18: ")
+    print(pvlive.day_energy(date(2019, 3, 18), entity_type="pes", entity_id=23))
 
-    print("\n\n---------- REGIONAL - GSP REGION 134 ----------")
-    print("\nLatest GSP region 134: ")
-    print(pvlive.latest(region_type="gsp", region_id=134))
-    print("\nLatest GSP region 134 as a Pandas DataFrame object: ")
-    print(pvlive.latest(region_type="gsp", region_id=134, dataframe=True))
-    print("\nGSP region 134 at 2019-03-18 12:00: ")
-    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), region_type="gsp",
-                         region_id=134))
-    print("\nGSP region 134 at 2019-03-18 12:00 as a Pandas DataFrame object: ")
-    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), region_type="gsp",
-                         region_id=134, dataframe=True))
-    print("\nGSP region 134 between 2019-03-18 10:30 and 2019-03-18 14:00: ")
+    print("\n\n---------- REGIONAL - GSP ID 120 ----------")
+    print("\nLatest GSP ID 120: ")
+    print(pvlive.latest(entity_type="gsp", entity_id=120))
+    print("\nLatest GSP ID 120 as a Pandas DataFrame object: ")
+    print(pvlive.latest(entity_type="gsp", entity_id=120, dataframe=True))
+    print("\nGSP ID 120 at 2019-03-18 12:00: ")
+    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), entity_type="gsp",
+                         entity_id=120))
+    print("\nGSP ID 120 at 2019-03-18 12:00 as a Pandas DataFrame object: ")
+    print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), entity_type="gsp",
+                         entity_id=120, dataframe=True))
+    print("\nGSP ID 120 between 2019-03-18 10:30 and 2019-03-18 14:00: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc), region_type="gsp",
-                         region_id=134))
-    print("\nGSP region 134 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="gsp",
+                         entity_id=120))
+    print("\nGSP ID 120 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
-                         datetime(2019, 3, 18, 14, 00, tzinfo=pytz.utc), region_type="gsp",
-                        region_id=134, dataframe=True))
-    print("\nGSP region 134 peak on 2019-03-18: ")
-    print(pvlive.day_peak(date(2019, 3, 18), region_type="gsp", region_id=134))
-    print("\nGSP region 134 peak on 2019-03-18 as a Pandas DataFrame object: ")
-    print(pvlive.day_peak(date(2019, 3, 18), region_type="gsp", region_id=134, dataframe=True))
-    print("\nGSP region 134 cumulative generation on 2019-03-18: ")
-    print(pvlive.day_energy(date(2019, 3, 18), region_type="gsp", region_id=134))
+                         datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="gsp",
+                        entity_id=120, dataframe=True))
+    print("\nGSP ID 120 peak on 2019-03-18: ")
+    print(pvlive.day_peak(date(2019, 3, 18), entity_type="gsp", entity_id=120))
+    print("\nGSP ID 120 peak on 2019-03-18 as a Pandas DataFrame object: ")
+    print(pvlive.day_peak(date(2019, 3, 18), entity_type="gsp", entity_id=120, dataframe=True))
+    print("\nGSP ID 120 cumulative generation on 2019-03-18: ")
+    print(pvlive.day_energy(date(2019, 3, 18), entity_type="gsp", entity_id=120))
 
 if __name__ == "__main__":
     main()
