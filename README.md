@@ -22,23 +22,23 @@ There are three methods for extracting raw data from the PV_Live API:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
-|`PVLive.latest(region_type="pes", region_id=0, extra_fields="", dataframe=False)`|Get the latest PV_Live generation result from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.latest)|
-|`PVLive.at_time(dt, region_type="pes", region_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.at_time)|
-|`PVLive.between(start, end, region_type="pes", region_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time interval from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.between)|
+|`PVLive.latest(entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the latest PV_Live generation result from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.latest)|
+|`PVLive.at_time(dt, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.at_time)|
+|`PVLive.between(start, end, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time interval from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.between)|
 
 There are two methods for extracting derived statistics:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
-|`PVLive.day_peak(d, region_type="pes", region_id=0, extra_fields="", dataframe=False)`|Get the peak PV_Live generation result for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_peak)|
-|`PVLive.day_energy(d, region_type="pes", region_id=0)`|Get the cumulative PV generation for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_energy)|
+|`PVLive.day_peak(d, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the peak PV_Live generation result for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_peak)|
+|`PVLive.day_energy(d, entity_type="pes", entity_id=0)`|Get the cumulative PV generation for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_energy)|
 
 These methods include the following optional parameters:
 
 |Parameter|Usage|
 |---------|-----|
-|`region_type`|Choose between `"pes"` or `"gsp"`. If querying for national data, this parameter can be set to either value (or left to it's default value) since setting `region_id` to `0` will always return national data.|
-|`region_id`|Set `region_id=0` (the default value) to return nationally aggregated data. If `region_type="pes"`, specify a _pes_id_ to retrieve data for, else if `region_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://data.nationalgrideso.com/system/gis-boundaries-for-gb-grid-supply-points).|
+|`entity_type`|Choose between `"pes"` or `"gsp"`. If querying for national data, this parameter can be set to either value (or left to it's default value) since setting `entity_id` to `0` will always return national data.|
+|`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://data.nationalgrideso.com/system/gis-boundaries-for-gb-grid-supply-points).|
 |`extra_fields`|Use this to extract additional fields from the API such as _installedcapacity_mwp_. For a full list of available fields, see the [PV_Live API Docs](https://www.solar.sheffield.ac.uk/pvlive/api/).|
 |`dataframe`|Set `dataframe=True` and the results will be returned as a Pandas DataFrame object which is generally much easier to work with. The columns of the DataFrame will be _pes_id_ or _gsp_id_, _datetime_gmt_, _generation_mw_, plus any extra fields specified.|
 
@@ -60,8 +60,8 @@ pvl = PVLive()
 |Example|Code|Example Output|
 |-------|----|------|
 |Get the latest nationally aggregated GB PV outturn|`pvl.latest()`|`(0, '2021-01-20T11:00:00Z', 203.0)`|
-|Get the latest aggregated outturn for **PES** region **23** (Yorkshire)|`pvl.latest(region_id=23)`|`(23, '2021-01-20T14:00:00Z', 5.8833031)`
-|Get the latest aggregated outturn for **GSP** ID **120** (INDQ1 or "Indian Queens")|`pvl.latest(region_type="gsp", region_id=120)`|`(120, '2021-01-20T14:00:00Z', 1, 3.05604)`
+|Get the latest aggregated outturn for **PES** region **23** (Yorkshire)|`pvl.latest(entity_id=23)`|`(23, '2021-01-20T14:00:00Z', 5.8833031)`
+|Get the latest aggregated outturn for **GSP** ID **120** (INDQ1 or "Indian Queens")|`pvl.latest(entity_type="gsp", entity_id=120)`|`(120, '2021-01-20T14:00:00Z', 1, 3.05604)`
 |Get the nationally aggregated GB PV outturn for all of 2020 as a DataFrame|`pvl.between(start=datetime(2020, 1, 1, 0, 30, tzinfo=pytz.utc), end=datetime(2021, 1, 1, tzinfo=pytz.utc), dataframe=True)`|![Screenshot of output](/misc/code_example_output.png?raw=true)|
 
 ## Documentation
