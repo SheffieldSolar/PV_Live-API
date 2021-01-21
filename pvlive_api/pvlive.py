@@ -16,7 +16,7 @@ from time import sleep
 import inspect
 import pytz
 import requests
-import numpy as np
+from numpy import nan
 import pandas as pd
 
 class PVLiveException(Exception):
@@ -312,7 +312,7 @@ class PVLive:
     def _convert_tuple_to_df(self, data, columns):
         """Converts a tuple of values to a data-frame object."""
         data = [data] if isinstance(data, tuple) else data
-        data = [tuple(np.nan if d is None else d for d in t) for t in data]
+        data = [tuple(nan if d is None else d for d in t) for t in data]
         data = pd.DataFrame(data, columns=columns)
         if "datetime_gmt" in data.columns:
             data.datetime_gmt = pd.to_datetime(data.datetime_gmt)
