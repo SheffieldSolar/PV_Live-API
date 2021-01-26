@@ -45,6 +45,8 @@ class PVLive:
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.ggd_lookup = self._get_ggd_lookup()
+        self.gsp_ids = self.ggd_lookup.gsp_id.dropna().astype(np.int64).unique()
+        self.pes_ids = self.ggd_lookup.pes_id.dropna().astype(np.int64).unique()
 
     def _get_ggd_lookup(self):
         """Fetch the GGD lookup from the API and convert to Pandas DataFrame."""
@@ -352,23 +354,21 @@ class PVLive:
             dt = dt - timedelta(minutes=dt.minute%30, seconds=dt.second) + timedelta(minutes=30)
         return dt
 
-    @staticmethod
-    def _validate_inputs(entity_type="pes", entity_id=0, extra_fields=""):
+    def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields=""):
         """Validate common input parameters."""
         if not isinstance(entity_type, str):
             raise PVLiveException("The entity_type must be a string.")
         if entity_type not in ["pes", "gsp"]:
             raise PVLiveException("The entity_type must be either 'pes' or 'gsp'.")
         if not isinstance(extra_fields, str):
-            raise PVLiveException("The extra_fields must be a comma-separated string.")
+            raise PVLiveException("The extra_fields must be a comma-separated string (with no "
+                                  "spaces).")
         if entity_type == "pes":
-            if entity_id != 0 and entity_id not in range(10, 24):
-                raise PVLiveException("The pes_id must be an integer between 10 and 23 (inclusive) "
-                                      "or 0 (For national).")
+            if entity_id != 0 and entity_id not in self.pes_ids:
+                raise PVLiveException(f"The pes_id {entity_id} was not found.")
         elif entity_type == "gsp":
-            if entity_id not in range(0, 328):
-                raise PVLiveException("The gsp_id must be an integer between 0 and 327 "
-                                      "(inclusive).")
+            if entity_id not in self.gsp_ids:
+                raise PVLiveException(f"The gsp_id {entity_id} was not found.")
 
 def main():
     """Placeholder for CLI."""
