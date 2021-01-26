@@ -16,7 +16,7 @@ from time import sleep
 import inspect
 import pytz
 import requests
-from numpy import nan
+from numpy import nan, int64
 import pandas as pd
 
 class PVLiveException(Exception):
@@ -45,8 +45,8 @@ class PVLive:
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.ggd_lookup = self._get_ggd_lookup()
-        self.gsp_ids = self.ggd_lookup.gsp_id.dropna().astype(np.int64).unique()
-        self.pes_ids = self.ggd_lookup.pes_id.dropna().astype(np.int64).unique()
+        self.gsp_ids = self.ggd_lookup.gsp_id.dropna().astype(int64).unique()
+        self.pes_ids = self.ggd_lookup.pes_id.dropna().astype(int64).unique()
 
     def _get_ggd_lookup(self):
         """Fetch the GGD lookup from the API and convert to Pandas DataFrame."""
