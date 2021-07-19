@@ -16,6 +16,7 @@ from time import sleep
 import inspect
 import pytz
 import requests
+import argparse
 from numpy import nan, int64
 import pandas as pd
 
@@ -370,10 +371,77 @@ class PVLive:
             if entity_id not in self.gsp_ids:
                 raise PVLiveException(f"The gsp_id {entity_id} was not found.")
 
+def parse_options():
+    """Parse command line options."""
+    parser = argparse.ArgumentParser(description=("This is a command line interface (CLI) for the "
+                                                  "PV_Live API module"),
+                                     epilog="Jamie Taylor, 2018-06-04")
+    parser.add_argument("-s", "--start", metavar="\"<yyyy-mm-dd HH:MM:SS>\"", dest="start",
+                        action="store", type=str, required=False, default=None,
+                        help="Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format "
+                             "(inclusive), default behaviour is to retrieve the latest outturn.")
+    parser.add_argument("-e", "--end", metavar="\"<yyyy-mm-dd HH:MM:SS>\"", dest="end",
+                        action="store", type=str, required=False, default=None,
+                        help="Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), "
+                        "default behaviour is to retrieve the latest outturn.")
+    parser.add_argument("--entity_type", metavar="<entity_type>", dest="entity_type",
+                        action="store", type=str, required=False, default="pes",
+                        choices=["gsp", "pes"],
+                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.")
+    parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
+                        type=int, required=False, default=0,
+                        help="Specify an entity ID, default is 0 (i.e. national).")
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true",
+                        required=False, help="Specify to not print anything to stdout.")
+    parser.add_argument("-o", "--outfile", metavar="</path/to/output/file>", dest="outfile",
+                        action="store", type=str, required=False,
+                        help="Specify a CSV file to write results to.")
+    options = parser.parse_args()
+    def handle_options(options):
+        """Validate command line args and pre-process where necessary."""
+        if (options.outfile is not None and os.path.exists(options.outfile)) and not options.quiet:
+            try:
+                input(f"The output file '{options.outfile}' already exists and will be "
+                      "overwritten, are you sure you want to continue? Press enter to continue or "
+                      "ctrl+c to abort.")
+            except KeyboardInterrupt:
+                print()
+                print("Aborting...")
+                sys.exit(0)
+        if options.start is not None:
+            try:
+                options.start = pytz.utc.localize(
+                    datetime.strptime(options.start, "%Y-%m-%d %H:%M:%S")
+                )
+            except:
+                raise Exception("OptionsError: Failed to parse start datetime, make sure you use "
+                                "'yyyy-mm-dd HH:MM:SS' format.")
+        if options.end is not None:
+            try:
+                options.end = pytz.utc.localize(datetime.strptime(options.end, "%Y-%m-%d %H:%M:%S"))
+            except:
+                raise Exception("OptionsError: Failed to parse end datetime, make sure you use "
+                                "'yyyy-mm-dd HH:MM:SS' format.")
+        return options
+    return handle_options(options)
+
 def main():
-    """Placeholder for CLI."""
-    print("There is no CLI for this module yet.")
-    sys.exit()
+    """Load CLI options and access the API accordingly."""
+    options = parse_options()
+    pvl = PVLive()
+    if options.start is None and options.end is None:
+        data = pvl.latest(entity_type=options.entity_type, entity_id=options.entity_id,
+                          extra_fields="installedcapacity_mwp", dataframe=True)
+    else:
+        start = datetime(2014, 1, 1, 0, 30, tzinfo=pytz.utc) if options.start is None \
+                else options.start
+        end = pytz.utc.localize(datetime.utcnow()) if options.end is None else options.end
+        data = pvl.between(start, end, entity_type=options.entity_type, entity_id=options.entity_id,
+                           extra_fields="installedcapacity_mwp", dataframe=True)
+    if options.outfile is not None:
+        data.to_csv(options.outfile, float_format="%.3f", index=False)
+    if not options.quiet:
+        print(data)
 
 if __name__ == "__main__":
     main()

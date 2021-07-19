@@ -2,9 +2,9 @@
 # PV_Live
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
-**Latest Version: 0.7**
+**Latest Version: 0.8**
 
-**New! Updated 2021-01-15 to use PV_Live API v3.**
+**New! Updated 2021-07-19 to include a Command Line Interface and Docker Image.**
 
 ## About this repository
 
@@ -63,6 +63,45 @@ pvl = PVLive()
 |Get the latest aggregated outturn for **PES** region **23** (Yorkshire)|`pvl.latest(entity_id=23)`|`(23, '2021-01-20T14:00:00Z', 5.8833031)`
 |Get the latest aggregated outturn for **GSP** ID **120** (INDQ1 or "Indian Queens")|`pvl.latest(entity_type="gsp", entity_id=120)`|`(120, '2021-01-20T14:00:00Z', 1, 3.05604)`
 |Get the nationally aggregated GB PV outturn for all of 2020 as a DataFrame|`pvl.between(start=datetime(2020, 1, 1, 0, 30, tzinfo=pytz.utc), end=datetime(2021, 1, 1, tzinfo=pytz.utc), dataframe=True)`|![Screenshot of output](/misc/code_example_output.png?raw=true)|
+
+## Command Line Utilities
+
+### pv_live
+
+This utility can be used to download data to a CSV file:
+
+```
+>> pv_live -h
+usage: pvlive.py [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"] [--entity_type <entity_type>] [--entity_id <entity_id>] [-q]
+                 [-o </path/to/output/file>]
+
+This is a command line interface (CLI) for the PV_Live API module
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s "<yyyy-mm-dd HH:MM:SS>", --start "<yyyy-mm-dd HH:MM:SS>"
+                        Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest
+                        outturn.
+  -e "<yyyy-mm-dd HH:MM:SS>", --end "<yyyy-mm-dd HH:MM:SS>"
+                        Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest outturn.
+  --entity_type <entity_type>
+                        Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.
+  --entity_id <entity_id>
+                        Specify an entity ID, default is 0 (i.e. national).
+  -q, --quiet           Specify to not print anything to stdout.
+  -o </path/to/output/file>, --outfile </path/to/output/file>
+                        Specify a CSV file to write results to.
+
+Jamie Taylor, 2018-06-04
+```
+
+## Using the Docker Image
+
+There is also a Docker Image hosted on Docker Hub which can be used to download data from the PV_Live API with minimal setup:
+
+```
+>> docker run -it --rm sheffieldsolar/pv_live-api:<release> pv_live -h
+```
 
 ## Documentation
 
