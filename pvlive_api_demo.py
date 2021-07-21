@@ -40,6 +40,24 @@ def main():
     print("\nCumulative generation on 2019-03-18: ")
     print(pvlive.day_energy(date(2019, 3, 18)))
 
+    print("\n\n---------- NATIONAL 5 MIN----------")
+    print("\nLatest: ")
+    print(pvlive.latest(period=5))
+    print("\nAt 2021-04-01 12:05: ")
+    print(pvlive.at_time(datetime(2021, 4, 1, 12, 5, tzinfo=pytz.utc), period=5))
+    print("\nAt 2021-04-01 12:05 as a Pandas DataFrame object: ")
+    print(pvlive.at_time(datetime(2021, 4, 1, 12, 5, tzinfo=pytz.utc), period=5, dataframe=True))
+    print("\nBetween 2021-04-01 10:30 and 2021-04-01 14:00: ")
+    print(pvlive.between(datetime(2021, 4, 1, 10, 30, tzinfo=pytz.utc),
+                         datetime(2021, 4, 1, 14, 0, tzinfo=pytz.utc), period=5))
+    print("\nBetween 2021-04-01 10:30 and 2021-04-01 14:00 as a Pandas DataFrame object: ")
+    print(pvlive.between(datetime(2021, 4, 1, 10, 30, tzinfo=pytz.utc),
+                         datetime(2021, 4, 1, 14, 0, tzinfo=pytz.utc), period=5, dataframe=True))
+    print("\nPeak on 2021-04-01: ")
+    print(pvlive.day_peak(date(2021, 4, 1), period=5))
+    print("\nPeak on 2021-04-01 as a Pandas DataFrame object: ")
+    print(pvlive.day_peak(date(2021, 4, 1), period=5, dataframe=True))
+
     print("\n\n---------- REGIONAL - PES REGION 23 ----------")
     print("\nLatest PES region 23: ")
     print(pvlive.latest(entity_type="pes", entity_id=23))

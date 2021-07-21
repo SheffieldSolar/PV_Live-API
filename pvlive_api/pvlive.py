@@ -56,7 +56,7 @@ class PVLive:
         ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
         return ggd_lookup
 
-    def latest(self, entity_type="pes", entity_id=0, extra_fields="", dataframe=False):
+    def latest(self, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False):
         """
         Get the latest PV_Live generation result from the API.
 
@@ -68,6 +68,8 @@ class PVLive:
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
             Comma-separated string listing any extra fields.
+        `period` : int
+            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
         `dataframe` : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
@@ -90,8 +92,8 @@ class PVLive:
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         self._validate_inputs(entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields)
-        params = self._compile_params(extra_fields)
+                              extra_fields=extra_fields, period=period)
+        params = self._compile_params(extra_fields, period=period)
         response = self._query_api(entity_type, entity_id, params)
         if response["data"]:
             data = tuple(response["data"][0])
@@ -102,7 +104,8 @@ class PVLive:
             return data[:2] + data[3:]
         return None
 
-    def at_time(self, dt, entity_type="pes", entity_id=0, extra_fields="", dataframe=False):
+    def at_time(self, dt, entity_type="pes", entity_id=0, extra_fields="", period=30,
+                dataframe=False):
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -117,6 +120,8 @@ class PVLive:
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
             Comma-separated string listing any extra fields.
+        `period` : int
+            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
         `dataframe` : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
@@ -136,12 +141,13 @@ class PVLive:
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         result = self.between(start=dt, end=dt, entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields, dataframe=dataframe)
+                              extra_fields=extra_fields, period=period, dataframe=dataframe)
         if dataframe:
             return result
         return tuple(result[0])
 
-    def between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", dataframe=False):
+    def between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
+                dataframe=False):
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -159,6 +165,8 @@ class PVLive:
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
             Comma-separated string listing any extra fields.
+        `period` : int
+            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
         `dataframe` : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
@@ -177,9 +185,10 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        return self._between(start, end, entity_type, entity_id, extra_fields, dataframe)[0]
+        return self._between(start, end, entity_type, entity_id, extra_fields, period, dataframe)[0]
 
-    def day_peak(self, d, entity_type="pes", entity_id=0, extra_fields="", dataframe=False):
+    def day_peak(self, d, entity_type="pes", entity_id=0, extra_fields="", period=30,
+                 dataframe=False):
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -193,6 +202,8 @@ class PVLive:
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
             Comma-separated string listing any extra fields.
+        `period` : int
+            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
         `dataframe` : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
@@ -261,32 +272,32 @@ class PVLive:
             return pv_energy
         return None
 
-    def _between(self, start, end, entity_type="pes", entity_id=0, extra_fields="",
+    def _between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
                  dataframe=False):
         """
         Get the PV_Live generation result for a given time interval from the API, returning both the
         data and the columns.
         """
         self._validate_inputs(entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields)
+                              extra_fields=extra_fields, period=period)
         type_check = not (isinstance(start, datetime) and isinstance(end, datetime))
         tz_check = start.tzinfo is None or end.tzinfo is None
         if type_check or tz_check:
             raise PVLiveException("Start and end must be timezone-aware Python datetime objects.")
         if end < start:
             raise PVLiveException("Start must be later than end.")
-        start = self._nearest_hh(start)
-        end = self._nearest_hh(end)
+        start = self._nearest_interval(start, period=period)
+        end = self._nearest_interval(end, period=period)
         data = []
         request_start = start
         max_range = self.max_range["national"] if entity_id == 0 and entity_type == 0 else \
                     self.max_range["regional"]
         while request_start <= end:
             request_end = min(end, request_start + max_range)
-            params = self._compile_params(extra_fields, request_start, request_end)
+            params = self._compile_params(extra_fields, request_start, request_end, period)
             response = self._query_api(entity_type, entity_id, params)
             data += response["data"]
-            request_start += max_range + timedelta(minutes=30)
+            request_start += max_range + timedelta(minutes=period)
         if dataframe:
             columns = response["meta"]
             return self._convert_tuple_to_df(data, columns), response["meta"]
@@ -295,7 +306,7 @@ class PVLive:
         response["meta"].remove("n_ggds")
         return [d[:2] + d[3:] for d in data], response["meta"]
 
-    def _compile_params(self, extra_fields="", start=None, end=None):
+    def _compile_params(self, extra_fields="", start=None, end=None, period=30):
         """Compile parameters into a Python dict, formatting where necessary."""
         params = {}
         if extra_fields:
@@ -305,6 +316,7 @@ class PVLive:
         end = start if (start is not None and end is None) else end
         if end is not None:
             params["end"] = end.isoformat().replace("+00:00", "Z")
+        params["period"] = period
         return params
 
     def _query_api(self, entity_type, entity_id, params):
@@ -349,13 +361,28 @@ class PVLive:
         except Exception as e:
             raise PVLiveException("Error communicating with the PV_Live API.") from e
 
+    def _nearest_interval(self, dt, period=30):
+        """Round to either the nearest 30 or 5 minute interval."""
+        if period == 30:
+            return self._nearest_hh(dt)
+        elif period == 5:
+            return self._nearest_5min(dt)
+        else:
+            return None
+
     def _nearest_hh(self, dt):
         """Round a given datetime object up to the nearest half hour."""
         if not(dt.minute % 30 == 0 and dt.second == 0 and dt.microsecond == 0):
-            dt = dt - timedelta(minutes=dt.minute%30, seconds=dt.second) + timedelta(minutes=30)
+            dt = dt - timedelta(minutes=dt.minute % 30, seconds=dt.second) + timedelta(minutes=30)
         return dt
 
-    def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields=""):
+    def _nearest_5min(self, dt):
+        """Round a given datetime object up to the nearest 5 minute interval."""
+        if not(dt.minute % 5 == 0 and dt.second == 0 and dt.microsecond == 0):
+            dt = dt - timedelta(minutes=dt.minute % 5, seconds=dt.second) + timedelta(minutes=5)
+        return dt
+
+    def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields="", period=30):
         """Validate common input parameters."""
         if not isinstance(entity_type, str):
             raise PVLiveException("The entity_type must be a string.")
@@ -370,6 +397,10 @@ class PVLive:
         elif entity_type == "gsp":
             if entity_id not in self.gsp_ids:
                 raise PVLiveException(f"The gsp_id {entity_id} was not found.")
+        periods = [5, 30]
+        if period not in periods:
+            raise PVLiveException("The period parameter must be one of: "
+                                  f"{', '.join(map(str, periods))}.")
 
 def parse_options():
     """Parse command line options."""
