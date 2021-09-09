@@ -13,6 +13,7 @@ import pytz
 
 from pvlive_api import PVLive
 
+
 def main():
     """
     Demo API's functionality.
@@ -73,7 +74,8 @@ def main():
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
                          datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="pes",
                          entity_id=23))
-    print("\nPES region 23 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
+    print("\nPES region 23 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame "
+          "object: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
                          datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="pes",
                          entity_id=23, dataframe=True))
@@ -99,16 +101,18 @@ def main():
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
                          datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="gsp",
                          entity_id=120))
-    print("\nGSP ID 120 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame object: ")
+    print("\nGSP ID 120 between 2019-03-18 10:30 and 2019-03-18 14:00 as a Pandas DataFrame "
+          "object: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),
                          datetime(2019, 3, 18, 14, 0, tzinfo=pytz.utc), entity_type="gsp",
-                        entity_id=120, dataframe=True))
+                         entity_id=120, dataframe=True))
     print("\nGSP ID 120 peak on 2019-03-18: ")
     print(pvlive.day_peak(date(2019, 3, 18), entity_type="gsp", entity_id=120))
     print("\nGSP ID 120 peak on 2019-03-18 as a Pandas DataFrame object: ")
     print(pvlive.day_peak(date(2019, 3, 18), entity_type="gsp", entity_id=120, dataframe=True))
     print("\nGSP ID 120 cumulative generation on 2019-03-18: ")
     print(pvlive.day_energy(date(2019, 3, 18), entity_type="gsp", entity_id=120))
+
 
 if __name__ == "__main__":
     main()

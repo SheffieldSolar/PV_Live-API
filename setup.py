@@ -44,7 +44,6 @@ setup(
         #   4 - Beta
         #   5 - Production/Stable
         "Development Status :: 4 - Beta",
-        #"Development Status :: 5 - Production/Stable",
 
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
@@ -92,14 +91,12 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        
     },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

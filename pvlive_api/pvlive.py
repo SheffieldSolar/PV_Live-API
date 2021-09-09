@@ -20,6 +20,7 @@ import argparse
 from numpy import nan, int64
 import pandas as pd
 
+
 class PVLiveException(Exception):
     """An Exception specific to the PVLive class."""
     def __init__(self, msg):
@@ -28,8 +29,10 @@ class PVLiveException(Exception):
         except:
             caller_file = os.path.basename(__file__)
         self.msg = "%s (in '%s')" % (msg, caller_file)
+
     def __str__(self):
         return self.msg
+
 
 class PVLive:
     """
@@ -290,7 +293,7 @@ class PVLive:
         data = []
         request_start = start
         max_range = self.max_range["national"] if entity_id == 0 and entity_type == 0 else \
-                    self.max_range["regional"]
+            self.max_range["regional"]
         while request_start <= end:
             request_end = min(end, request_start + max_range)
             params = self._compile_params(extra_fields, request_start, request_end, period)
@@ -307,7 +310,7 @@ class PVLive:
         """Remove the n_ggds column from the API response (not useful for most users)."""
         if "n_ggds" in meta:
             ind = meta.index("n_ggds")
-            data  = [d[:ind] + d[ind+1:] for d in data]
+            data = [d[:ind] + d[ind + 1:] for d in data]
             meta.remove("n_ggds")
         return data, meta
 
@@ -392,6 +395,7 @@ class PVLive:
             raise ValueError("The period parameter must be one of: "
                              f"{', '.join(map(str, periods))}.")
 
+
 def parse_options():
     """Parse command line options."""
     parser = argparse.ArgumentParser(description=("This is a command line interface (CLI) for the "
@@ -422,6 +426,7 @@ def parse_options():
                         action="store", type=str, required=False,
                         help="Specify a CSV file to write results to.")
     options = parser.parse_args()
+
     def handle_options(options):
         """Validate command line args and pre-process where necessary."""
         if (options.outfile is not None and os.path.exists(options.outfile)) and not options.quiet:
@@ -450,6 +455,7 @@ def parse_options():
         return options
     return handle_options(options)
 
+
 def main():
     """Load CLI options and access the API accordingly."""
     options = parse_options()
@@ -459,7 +465,7 @@ def main():
                           extra_fields="installedcapacity_mwp", dataframe=True)
     else:
         start = datetime(2014, 1, 1, 0, 30, tzinfo=pytz.utc) if options.start is None \
-                else options.start
+            else options.start
         end = pytz.utc.localize(datetime.utcnow()) if options.end is None else options.end
         data = pvl.between(start, end, entity_type=options.entity_type, entity_id=options.entity_id,
                            extra_fields="installedcapacity_mwp", period=options.period,
@@ -468,6 +474,7 @@ def main():
         data.to_csv(options.outfile, float_format="%.3f", index=False)
     if not options.quiet:
         print(data)
+
 
 if __name__ == "__main__":
     main()
