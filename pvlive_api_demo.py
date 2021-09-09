@@ -25,7 +25,7 @@ def main():
     print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc)))
     print("\nAt 2019-03-18 12:00 as a Pandas DataFrame object: ")
     print(pvlive.at_time(datetime(2019, 3, 18, 12, 0, tzinfo=pytz.utc), dataframe=True))
-    print("\nAt 2019-03-18 12:35: ")
+    print("\nAt 2019-03-18 12:35 (with period=30): ")
     print(pvlive.at_time(datetime(2019, 3, 18, 12, 35, tzinfo=pytz.utc)))
     print("\nBetween 2019-03-18 10:30 and 2019-03-18 14:00: ")
     print(pvlive.between(datetime(2019, 3, 18, 10, 30, tzinfo=pytz.utc),

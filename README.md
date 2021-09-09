@@ -2,14 +2,14 @@
 # PV_Live
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
-**Latest Version: 0.8**
+**Latest Version: 0.9**
 
-**New! Updated 2021-07-19 to include a Command Line Interface and Docker Image.**
+**New! Updated 2021-09-09 to include support for accessing 5 minutely PV_Live outturns.**
 
 ## About this repository
 
 * This Python library provides a convenient interface for the PV_Live web API to facilitate accessing PV_Live results in Python code.
-* Developed and tested with Python 3.7, should work with Python 3.5+. Support for Python 2.7+ has been discontinued as of 2021-01-15.
+* Developed and tested with Python 3.8, should work with Python 3.5+. Support for Python 2.7+ has been discontinued as of 2021-01-15.
 
 ## How do I get set up?
 
@@ -22,15 +22,15 @@ There are three methods for extracting raw data from the PV_Live API:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
-|`PVLive.latest(entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the latest PV_Live generation result from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.latest)|
-|`PVLive.at_time(dt, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.at_time)|
-|`PVLive.between(start, end, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the PV_Live generation result for a given time interval from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.between)|
+|`PVLive.latest(entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the latest PV_Live generation result from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.latest)|
+|`PVLive.at_time(dt, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the PV_Live generation result for a given time from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.at_time)|
+|`PVLive.between(start, end, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the PV_Live generation result for a given time interval from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.between)|
 
 There are two methods for extracting derived statistics:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
-|`PVLive.day_peak(d, entity_type="pes", entity_id=0, extra_fields="", dataframe=False)`|Get the peak PV_Live generation result for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_peak)|
+|`PVLive.day_peak(d, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the peak PV_Live generation result for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_peak)|
 |`PVLive.day_energy(d, entity_type="pes", entity_id=0)`|Get the cumulative PV generation for a given day from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.day_energy)|
 
 These methods include the following optional parameters:
@@ -40,6 +40,7 @@ These methods include the following optional parameters:
 |`entity_type`|Choose between `"pes"` or `"gsp"`. If querying for national data, this parameter can be set to either value (or left to it's default value) since setting `entity_id` to `0` will always return national data.|
 |`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://data.nationalgrideso.com/system/gis-boundaries-for-gb-grid-supply-points).|
 |`extra_fields`|Use this to extract additional fields from the API such as _installedcapacity_mwp_. For a full list of available fields, see the [PV_Live API Docs](https://www.solar.sheffield.ac.uk/pvlive/api/).|
+|`period`|Set the desired temporal resolution (in minutes) for PV outturn estimates. Options are 30 (default) or 5.|
 |`dataframe`|Set `dataframe=True` and the results will be returned as a Pandas DataFrame object which is generally much easier to work with. The columns of the DataFrame will be _pes_id_ or _gsp_id_, _datetime_gmt_, _generation_mw_, plus any extra fields specified.|
 
 ## Code Examples
@@ -72,22 +73,22 @@ This utility can be used to download data to a CSV file:
 
 ```
 >> pv_live -h
-usage: pvlive.py [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"] [--entity_type <entity_type>] [--entity_id <entity_id>] [-q]
-                 [-o </path/to/output/file>]
+usage: pvlive.py [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"] [--entity_type <entity_type>] [--entity_id <entity_id>]
+                 [--period <5|30>] [-q] [-o </path/to/output/file>]
 
 This is a command line interface (CLI) for the PV_Live API module
 
 optional arguments:
   -h, --help            show this help message and exit
   -s "<yyyy-mm-dd HH:MM:SS>", --start "<yyyy-mm-dd HH:MM:SS>"
-                        Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest
-                        outturn.
+                        Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest outturn.
   -e "<yyyy-mm-dd HH:MM:SS>", --end "<yyyy-mm-dd HH:MM:SS>"
                         Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest outturn.
   --entity_type <entity_type>
                         Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.
   --entity_id <entity_id>
                         Specify an entity ID, default is 0 (i.e. national).
+  --period <5|30>       Desired temporal resolution (in minutes) for PV outturn estimates. Default is 30.
   -q, --quiet           Specify to not print anything to stdout.
   -o </path/to/output/file>, --outfile </path/to/output/file>
                         Specify a CSV file to write results to.

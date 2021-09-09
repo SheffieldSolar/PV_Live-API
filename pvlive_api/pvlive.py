@@ -96,12 +96,11 @@ class PVLive:
         params = self._compile_params(extra_fields, period=period)
         response = self._query_api(entity_type, entity_id, params)
         if response["data"]:
-            data = tuple(response["data"][0])
+            data, meta = self._remove_n_ggds(response["data"], response["meta"])
+            data = tuple(data[0])
             if dataframe:
-                return self._convert_tuple_to_df(data, response["meta"])
-            if entity_type == "pes":
-                return data
-            return data[:2] + data[3:]
+                return self._convert_tuple_to_df(data, meta)
+            return data
         return None
 
     def at_time(self, dt, entity_type="pes", entity_id=0, extra_fields="", period=30,
@@ -226,12 +225,12 @@ class PVLive:
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
         if not isinstance(d, date):
-            raise PVLiveException("The d must be a Python date object.")
+            raise TypeError("`d` must be a Python date object.")
         start = datetime.combine(d, time(0, 30, tzinfo=pytz.UTC))
         end = start + timedelta(days=1) - timedelta(minutes=30)
-        data, meta = self._between(start, end, entity_type, entity_id, extra_fields)
+        data, meta = self._between(start, end, entity_type, entity_id, extra_fields, period=period)
         if data:
-            gen_index = 2
+            gen_index = meta.index("generation_mw")
             gens = [x[gen_index] if x[gen_index] is not None else -1e308 for x in data]
             index_max = max(range(len(gens)), key=gens.__getitem__)
             maxdata = tuple(data[index_max])
@@ -262,12 +261,12 @@ class PVLive:
             If no data found, return None.
         """
         if not isinstance(d, date):
-            raise PVLiveException("The d must be a Python date object.")
+            raise TypeError("`d` must be a Python date object.")
         start = datetime.combine(d, time(0, 30, tzinfo=pytz.UTC))
         end = start + timedelta(days=1) - timedelta(minutes=30)
-        data, _ = self._between(start, end, entity_type=entity_type, entity_id=entity_id)
+        data, meta = self._between(start, end, entity_type=entity_type, entity_id=entity_id)
         if data:
-            gen_index = 2
+            gen_index = meta.index("generation_mw")
             pv_energy = sum([x[gen_index] if x[gen_index] is not None else 0 for x in data]) * 0.5
             return pv_energy
         return None
@@ -283,9 +282,9 @@ class PVLive:
         type_check = not (isinstance(start, datetime) and isinstance(end, datetime))
         tz_check = start.tzinfo is None or end.tzinfo is None
         if type_check or tz_check:
-            raise PVLiveException("Start and end must be timezone-aware Python datetime objects.")
+            raise ValueError("`start` and `end` must be timezone-aware Python datetime objects.")
         if end < start:
-            raise PVLiveException("Start must be later than end.")
+            raise ValueError("Start must be later than end.")
         start = self._nearest_interval(start, period=period)
         end = self._nearest_interval(end, period=period)
         data = []
@@ -298,13 +297,19 @@ class PVLive:
             response = self._query_api(entity_type, entity_id, params)
             data += response["data"]
             request_start += max_range + timedelta(minutes=period)
+        data, meta = self._remove_n_ggds(data, response["meta"])
         if dataframe:
-            columns = response["meta"]
-            return self._convert_tuple_to_df(data, columns), response["meta"]
-        if entity_type == "pes":
-            return data, response["meta"]
-        response["meta"].remove("n_ggds")
-        return [d[:2] + d[3:] for d in data], response["meta"]
+            return self._convert_tuple_to_df(data, meta), meta
+        return data, meta
+
+    @staticmethod
+    def _remove_n_ggds(data, meta):
+        """Remove the n_ggds column from the API response (not useful for most users)."""
+        if "n_ggds" in meta:
+            ind = meta.index("n_ggds")
+            data  = [d[:ind] + d[ind+1:] for d in data]
+            meta.remove("n_ggds")
+        return data, meta
 
     def _compile_params(self, extra_fields="", start=None, end=None, period=30):
         """Compile parameters into a Python dict, formatting where necessary."""
@@ -363,34 +368,19 @@ class PVLive:
 
     def _nearest_interval(self, dt, period=30):
         """Round to either the nearest 30 or 5 minute interval."""
-        if period == 30:
-            return self._nearest_hh(dt)
-        elif period == 5:
-            return self._nearest_5min(dt)
-        else:
-            return None
-
-    def _nearest_hh(self, dt):
-        """Round a given datetime object up to the nearest half hour."""
-        if not(dt.minute % 30 == 0 and dt.second == 0 and dt.microsecond == 0):
-            dt = dt - timedelta(minutes=dt.minute % 30, seconds=dt.second) + timedelta(minutes=30)
-        return dt
-
-    def _nearest_5min(self, dt):
-        """Round a given datetime object up to the nearest 5 minute interval."""
-        if not(dt.minute % 5 == 0 and dt.second == 0 and dt.microsecond == 0):
-            dt = dt - timedelta(minutes=dt.minute % 5, seconds=dt.second) + timedelta(minutes=5)
+        if not(dt.minute % period == 0 and dt.second == 0 and dt.microsecond == 0):
+            dt = dt - timedelta(minutes=dt.minute % period, seconds=dt.second,
+                                microseconds=dt.microsecond) + timedelta(minutes=period)
         return dt
 
     def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields="", period=30):
         """Validate common input parameters."""
         if not isinstance(entity_type, str):
-            raise PVLiveException("The entity_type must be a string.")
+            raise TypeError("The entity_type must be a string.")
         if entity_type not in ["pes", "gsp"]:
-            raise PVLiveException("The entity_type must be either 'pes' or 'gsp'.")
+            raise ValueError("The entity_type must be either 'pes' or 'gsp'.")
         if not isinstance(extra_fields, str):
-            raise PVLiveException("The extra_fields must be a comma-separated string (with no "
-                                  "spaces).")
+            raise TypeError("The extra_fields must be a comma-separated string (with no spaces).")
         if entity_type == "pes":
             if entity_id != 0 and entity_id not in self.pes_ids:
                 raise PVLiveException(f"The pes_id {entity_id} was not found.")
@@ -399,8 +389,8 @@ class PVLive:
                 raise PVLiveException(f"The gsp_id {entity_id} was not found.")
         periods = [5, 30]
         if period not in periods:
-            raise PVLiveException("The period parameter must be one of: "
-                                  f"{', '.join(map(str, periods))}.")
+            raise ValueError("The period parameter must be one of: "
+                             f"{', '.join(map(str, periods))}.")
 
 def parse_options():
     """Parse command line options."""
@@ -422,6 +412,10 @@ def parse_options():
     parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
                         type=int, required=False, default=0,
                         help="Specify an entity ID, default is 0 (i.e. national).")
+    parser.add_argument("--period", metavar="<5|30>", dest="period", action="store",
+                        type=int, required=False, default=30, choices=(5, 30),
+                        help="Desired temporal resolution (in minutes) for PV outturn estimates. "
+                             "Default is 30.")
     parser.add_argument("-q", "--quiet", dest="quiet", action="store_true",
                         required=False, help="Specify to not print anything to stdout.")
     parser.add_argument("-o", "--outfile", metavar="</path/to/output/file>", dest="outfile",
@@ -468,7 +462,8 @@ def main():
                 else options.start
         end = pytz.utc.localize(datetime.utcnow()) if options.end is None else options.end
         data = pvl.between(start, end, entity_type=options.entity_type, entity_id=options.entity_id,
-                           extra_fields="installedcapacity_mwp", dataframe=True)
+                           extra_fields="installedcapacity_mwp", period=options.period,
+                           dataframe=True)
     if options.outfile is not None:
         data.to_csv(options.outfile, float_format="%.3f", index=False)
     if not options.quiet:
