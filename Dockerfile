@@ -8,13 +8,6 @@ RUN apt-get -qq update && apt-get -qq install -y \
     curl \
     git \
     wget \
-    libproj-dev \
-    proj-data \
-    proj-bin \
-    libgeos-dev \
-    libgdal-dev \
-    python-gdal \
-    gdal-bin \
     > /dev/null
 
 RUN pip install --no-cache-dir git+https://github.com/SheffieldSolar/PV_Live-API.git@0.9 > /dev/null
