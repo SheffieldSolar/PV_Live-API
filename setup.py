@@ -22,7 +22,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.8",
+    version="0.9",
 
     description="A Python interface for the PV_Live web API from Sheffield Solar.",
     long_description=long_description,
@@ -44,7 +44,6 @@ setup(
         #   4 - Beta
         #   5 - Production/Stable
         "Development Status :: 4 - Beta",
-        #"Development Status :: 5 - Production/Stable",
 
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
@@ -92,14 +91,12 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        
     },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

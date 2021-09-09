@@ -105,6 +105,17 @@ class PVLiveTestCase(unittest.TestCase):
                                dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
+        data = self.api.latest(entity_type="pes", entity_id=0, period=5)
+        self.check_pes_tuple(data)
+        self.check_pes_tuple_dtypes(data)
+        data = self.api.latest(entity_type="pes", entity_id=0, period=5, dataframe=True)
+        self.check_df_columns(data)
+        self.check_df_dtypes(data)
+        data = self.api.latest(entity_type="pes", entity_id=0,
+                               extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+                               period=5, dataframe=True)
+        self.check_df_columns(data)
+        self.check_df_dtypes(data)
         data = self.api.latest(entity_type="gsp", entity_id=103)
         self.check_gsp_tuple(data)
         self.check_gsp_tuple_dtypes(data)
@@ -121,8 +132,18 @@ class PVLiveTestCase(unittest.TestCase):
         self.check_df_columns(data)
         self.check_df_dtypes(data)
         data = self.api.day_peak(d=date(2018, 6, 3),
-                                  extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                  entity_type="pes", entity_id=0, dataframe=True)
+                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+                                 entity_type="pes", entity_id=0, dataframe=True)
+        data = self.api.day_peak(d=date(2021, 5, 1), entity_type="pes", entity_id=0, period=5)
+        self.check_pes_tuple(data)
+        self.check_pes_tuple_dtypes(data)
+        data = self.api.day_peak(d=date(2021, 5, 1), entity_type="pes", entity_id=0, period=5,
+                                 dataframe=True)
+        self.check_df_columns(data)
+        self.check_df_dtypes(data)
+        data = self.api.day_peak(d=date(2021, 5, 1),
+                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+                                 entity_type="pes", entity_id=0, period=5, dataframe=True)
         self.check_df_dtypes(data)
         data = self.api.day_peak(d=date(2018, 6, 3), entity_type="gsp", entity_id=54)
         self.check_gsp_tuple(data)
@@ -150,8 +171,22 @@ class PVLiveTestCase(unittest.TestCase):
         self.check_df_columns(data)
         self.check_df_dtypes(data)
         data = self.api.day_peak(d=date(2018, 6, 3),
+                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+                                 entity_type="pes", entity_id=0, dataframe=True)
+        self.check_df_dtypes(data)
+        data = self.api.between(start=datetime(2021, 5, 1, tzinfo=pytz.utc),
+                                end=datetime(2021, 5, 1, 14, 00, tzinfo=pytz.utc),
+                                entity_type="pes", entity_id=0, period=5)
+        with self.subTest():
+            assert isinstance(data, list)
+        data = self.api.between(start=datetime(2021, 5, 1, 12, 20, tzinfo=pytz.utc),
+                                end=datetime(2021, 5, 1, 14, 00, tzinfo=pytz.utc),
+                                entity_type="pes", entity_id=0, period=5, dataframe=True)
+        self.check_df_columns(data)
+        self.check_df_dtypes(data)
+        data = self.api.day_peak(d=date(2021, 5, 1),
                                   extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                  entity_type="pes", entity_id=0, dataframe=True)
+                                  entity_type="pes", entity_id=0, period=5, dataframe=True)
         self.check_df_dtypes(data)
 
     def test_at_time(self):
@@ -168,6 +203,19 @@ class PVLiveTestCase(unittest.TestCase):
                                 entity_id=0,
                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
                                 dataframe=True)
+        self.check_df_dtypes(data)
+        data = self.api.at_time(dt=datetime(2021, 5, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
+                                            entity_id=0, period=5)
+        self.check_pes_tuple(data)
+        self.check_pes_tuple_dtypes(data)
+        data = self.api.at_time(datetime(2021, 5, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
+                                entity_id=0, period=5, dataframe=True)
+        self.check_df_columns(data)
+        self.check_df_dtypes(data)
+        data = self.api.at_time(datetime(2021, 5, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
+                                entity_id=0,
+                                extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+                                period=5, dataframe=True)
         self.check_df_dtypes(data)
         data = self.api.at_time(dt=datetime(2018, 6, 3, 12, 35, tzinfo=pytz.utc), entity_type="gsp",
                                 entity_id=26)
