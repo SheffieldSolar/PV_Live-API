@@ -23,6 +23,7 @@ import pandas as pd
 
 class PVLiveException(Exception):
     """An Exception specific to the PVLive class."""
+
     def __init__(self, msg):
         try:
             caller_file = inspect.stack()[2][1]
@@ -44,6 +45,7 @@ class PVLive:
         Optionally specify the number of retries to use should the API respond with anything
         other than status code 200. Exponential back-off applies inbetween retries.
     """
+
     def __init__(self, retries=3):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/v3/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
@@ -94,8 +96,9 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        self._validate_inputs(entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields, period=period)
+        self._validate_inputs(
+            entity_type=entity_type, entity_id=entity_id, extra_fields=extra_fields, period=period
+        )
         params = self._compile_params(extra_fields, period=period)
         response = self._query_api(entity_type, entity_id, params)
         if response["data"]:
@@ -106,8 +109,9 @@ class PVLive:
             return data
         return None
 
-    def at_time(self, dt, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                dataframe=False):
+    def at_time(
+        self, dt, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False
+    ):
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -142,14 +146,29 @@ class PVLive:
         For list of optional *extra_fields*, see `PV_Live API Docs
         <https://www.solar.sheffield.ac.uk/pvlive/api/>`_.
         """
-        result = self.between(start=dt, end=dt, entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields, period=period, dataframe=dataframe)
+        result = self.between(
+            start=dt,
+            end=dt,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            extra_fields=extra_fields,
+            period=period,
+            dataframe=dataframe,
+        )
         if dataframe:
             return result
         return tuple(result[0])
 
-    def between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                dataframe=False):
+    def between(
+        self,
+        start,
+        end,
+        entity_type="pes",
+        entity_id=0,
+        extra_fields="",
+        period=30,
+        dataframe=False,
+    ):
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -189,8 +208,9 @@ class PVLive:
         """
         return self._between(start, end, entity_type, entity_id, extra_fields, period, dataframe)[0]
 
-    def day_peak(self, d, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                 dataframe=False):
+    def day_peak(
+        self, d, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False
+    ):
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -274,14 +294,23 @@ class PVLive:
             return pv_energy
         return None
 
-    def _between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                 dataframe=False):
+    def _between(
+        self,
+        start,
+        end,
+        entity_type="pes",
+        entity_id=0,
+        extra_fields="",
+        period=30,
+        dataframe=False,
+    ):
         """
         Get the PV_Live generation result for a given time interval from the API, returning both the
         data and the columns.
         """
-        self._validate_inputs(entity_type=entity_type, entity_id=entity_id,
-                              extra_fields=extra_fields, period=period)
+        self._validate_inputs(
+            entity_type=entity_type, entity_id=entity_id, extra_fields=extra_fields, period=period
+        )
         type_check = not (isinstance(start, datetime) and isinstance(end, datetime))
         tz_check = start.tzinfo is None or end.tzinfo is None
         if type_check or tz_check:
@@ -292,8 +321,11 @@ class PVLive:
         end = self._nearest_interval(end, period=period)
         data = []
         request_start = start
-        max_range = self.max_range["national"] if entity_id == 0 and entity_type == 0 else \
-            self.max_range["regional"]
+        max_range = (
+            self.max_range["national"]
+            if entity_id == 0 and entity_type == 0
+            else self.max_range["regional"]
+        )
         while request_start <= end:
             request_end = min(end, request_start + max_range)
             params = self._compile_params(extra_fields, request_start, request_end, period)
@@ -310,7 +342,7 @@ class PVLive:
         """Remove the n_ggds column from the API response (not useful for most users)."""
         if "n_ggds" in meta:
             ind = meta.index("n_ggds")
-            data = [d[:ind] + d[ind + 1:] for d in data]
+            data = [d[:ind] + d[ind + 1 :] for d in data]
             meta.remove("n_ggds")
         return data, meta
 
@@ -371,9 +403,14 @@ class PVLive:
 
     def _nearest_interval(self, dt, period=30):
         """Round to either the nearest 30 or 5 minute interval."""
-        if not(dt.minute % period == 0 and dt.second == 0 and dt.microsecond == 0):
-            dt = dt - timedelta(minutes=dt.minute % period, seconds=dt.second,
-                                microseconds=dt.microsecond) + timedelta(minutes=period)
+        if not (dt.minute % period == 0 and dt.second == 0 and dt.microsecond == 0):
+            dt = (
+                dt
+                - timedelta(
+                    minutes=dt.minute % period, seconds=dt.second, microseconds=dt.microsecond
+                )
+                + timedelta(minutes=period)
+            )
         return dt
 
     def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields="", period=30):
@@ -392,48 +429,102 @@ class PVLive:
                 raise PVLiveException(f"The gsp_id {entity_id} was not found.")
         periods = [5, 30]
         if period not in periods:
-            raise ValueError("The period parameter must be one of: "
-                             f"{', '.join(map(str, periods))}.")
+            raise ValueError(
+                "The period parameter must be one of: " f"{', '.join(map(str, periods))}."
+            )
 
 
 def parse_options():
     """Parse command line options."""
-    parser = argparse.ArgumentParser(description=("This is a command line interface (CLI) for the "
-                                                  "PV_Live API module"),
-                                     epilog="Jamie Taylor, 2018-06-04")
-    parser.add_argument("-s", "--start", metavar="\"<yyyy-mm-dd HH:MM:SS>\"", dest="start",
-                        action="store", type=str, required=False, default=None,
-                        help="Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format "
-                             "(inclusive), default behaviour is to retrieve the latest outturn.")
-    parser.add_argument("-e", "--end", metavar="\"<yyyy-mm-dd HH:MM:SS>\"", dest="end",
-                        action="store", type=str, required=False, default=None,
-                        help="Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), "
-                        "default behaviour is to retrieve the latest outturn.")
-    parser.add_argument("--entity_type", metavar="<entity_type>", dest="entity_type",
-                        action="store", type=str, required=False, default="pes",
-                        choices=["gsp", "pes"],
-                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.")
-    parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
-                        type=int, required=False, default=0,
-                        help="Specify an entity ID, default is 0 (i.e. national).")
-    parser.add_argument("--period", metavar="<5|30>", dest="period", action="store",
-                        type=int, required=False, default=30, choices=(5, 30),
-                        help="Desired temporal resolution (in minutes) for PV outturn estimates. "
-                             "Default is 30.")
-    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true",
-                        required=False, help="Specify to not print anything to stdout.")
-    parser.add_argument("-o", "--outfile", metavar="</path/to/output/file>", dest="outfile",
-                        action="store", type=str, required=False,
-                        help="Specify a CSV file to write results to.")
+    parser = argparse.ArgumentParser(
+        description=("This is a command line interface (CLI) for the " "PV_Live API module"),
+        epilog="Jamie Taylor, 2018-06-04",
+    )
+    parser.add_argument(
+        "-s",
+        "--start",
+        metavar='"<yyyy-mm-dd HH:MM:SS>"',
+        dest="start",
+        action="store",
+        type=str,
+        required=False,
+        default=None,
+        help="Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format "
+        "(inclusive), default behaviour is to retrieve the latest outturn.",
+    )
+    parser.add_argument(
+        "-e",
+        "--end",
+        metavar='"<yyyy-mm-dd HH:MM:SS>"',
+        dest="end",
+        action="store",
+        type=str,
+        required=False,
+        default=None,
+        help="Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), "
+        "default behaviour is to retrieve the latest outturn.",
+    )
+    parser.add_argument(
+        "--entity_type",
+        metavar="<entity_type>",
+        dest="entity_type",
+        action="store",
+        type=str,
+        required=False,
+        default="pes",
+        choices=["gsp", "pes"],
+        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.",
+    )
+    parser.add_argument(
+        "--entity_id",
+        metavar="<entity_id>",
+        dest="entity_id",
+        action="store",
+        type=int,
+        required=False,
+        default=0,
+        help="Specify an entity ID, default is 0 (i.e. national).",
+    )
+    parser.add_argument(
+        "--period",
+        metavar="<5|30>",
+        dest="period",
+        action="store",
+        type=int,
+        required=False,
+        default=30,
+        choices=(5, 30),
+        help="Desired temporal resolution (in minutes) for PV outturn estimates. " "Default is 30.",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        dest="quiet",
+        action="store_true",
+        required=False,
+        help="Specify to not print anything to stdout.",
+    )
+    parser.add_argument(
+        "-o",
+        "--outfile",
+        metavar="</path/to/output/file>",
+        dest="outfile",
+        action="store",
+        type=str,
+        required=False,
+        help="Specify a CSV file to write results to.",
+    )
     options = parser.parse_args()
 
     def handle_options(options):
         """Validate command line args and pre-process where necessary."""
         if (options.outfile is not None and os.path.exists(options.outfile)) and not options.quiet:
             try:
-                input(f"The output file '{options.outfile}' already exists and will be "
-                      "overwritten, are you sure you want to continue? Press enter to continue or "
-                      "ctrl+c to abort.")
+                input(
+                    f"The output file '{options.outfile}' already exists and will be "
+                    "overwritten, are you sure you want to continue? Press enter to continue or "
+                    "ctrl+c to abort."
+                )
             except KeyboardInterrupt:
                 print()
                 print("Aborting...")
@@ -444,15 +535,20 @@ def parse_options():
                     datetime.strptime(options.start, "%Y-%m-%d %H:%M:%S")
                 )
             except:
-                raise Exception("OptionsError: Failed to parse start datetime, make sure you use "
-                                "'yyyy-mm-dd HH:MM:SS' format.")
+                raise Exception(
+                    "OptionsError: Failed to parse start datetime, make sure you use "
+                    "'yyyy-mm-dd HH:MM:SS' format."
+                )
         if options.end is not None:
             try:
                 options.end = pytz.utc.localize(datetime.strptime(options.end, "%Y-%m-%d %H:%M:%S"))
             except:
-                raise Exception("OptionsError: Failed to parse end datetime, make sure you use "
-                                "'yyyy-mm-dd HH:MM:SS' format.")
+                raise Exception(
+                    "OptionsError: Failed to parse end datetime, make sure you use "
+                    "'yyyy-mm-dd HH:MM:SS' format."
+                )
         return options
+
     return handle_options(options)
 
 
@@ -461,15 +557,26 @@ def main():
     options = parse_options()
     pvl = PVLive()
     if options.start is None and options.end is None:
-        data = pvl.latest(entity_type=options.entity_type, entity_id=options.entity_id,
-                          extra_fields="installedcapacity_mwp", dataframe=True)
+        data = pvl.latest(
+            entity_type=options.entity_type,
+            entity_id=options.entity_id,
+            extra_fields="installedcapacity_mwp",
+            dataframe=True,
+        )
     else:
-        start = datetime(2014, 1, 1, 0, 30, tzinfo=pytz.utc) if options.start is None \
-            else options.start
+        start = (
+            datetime(2014, 1, 1, 0, 30, tzinfo=pytz.utc) if options.start is None else options.start
+        )
         end = pytz.utc.localize(datetime.utcnow()) if options.end is None else options.end
-        data = pvl.between(start, end, entity_type=options.entity_type, entity_id=options.entity_id,
-                           extra_fields="installedcapacity_mwp", period=options.period,
-                           dataframe=True)
+        data = pvl.between(
+            start,
+            end,
+            entity_type=options.entity_type,
+            entity_id=options.entity_id,
+            extra_fields="installedcapacity_mwp",
+            period=options.period,
+            dataframe=True,
+        )
     if options.outfile is not None:
         data.to_csv(options.outfile, float_format="%.3f", index=False)
     if not options.quiet:
