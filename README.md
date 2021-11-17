@@ -64,6 +64,8 @@ pvl = PVLive()
 |Get the latest aggregated outturn for **PES** region **23** (Yorkshire)|`pvl.latest(entity_id=23)`|`(23, '2021-01-20T14:00:00Z', 5.8833031)`
 |Get the latest aggregated outturn for **GSP** ID **120** (INDQ1 or "Indian Queens")|`pvl.latest(entity_type="gsp", entity_id=120)`|`(120, '2021-01-20T14:00:00Z', 1, 3.05604)`
 |Get the nationally aggregated GB PV outturn for all of 2020 as a DataFrame|`pvl.between(start=datetime(2020, 1, 1, 0, 30, tzinfo=pytz.utc), end=datetime(2021, 1, 1, tzinfo=pytz.utc), dataframe=True)`|![Screenshot of output](/misc/code_example_output.png?raw=true)|
+|Get a list of GSP IDs|`pvl.gsp_ids`|`array([  0,   1,   2,   3,   ..., 336, 337, 338])`|
+|Get a list of PES IDs|`pvl.pes_ids`|`array([  0,   1,   2,   3,   ..., 336, 337, 338])`|
 
 ## Command Line Utilities
 
