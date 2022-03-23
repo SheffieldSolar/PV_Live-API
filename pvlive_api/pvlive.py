@@ -13,7 +13,7 @@ import os
 import json
 from datetime import datetime, timedelta, date, time
 from time import sleep
-from typing import List, Tuple
+from typing import List, Union, Tuple
 import inspect
 import pytz
 import requests
