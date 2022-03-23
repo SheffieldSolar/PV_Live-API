@@ -13,6 +13,7 @@ import os
 import json
 from datetime import datetime, timedelta, date, time
 from time import sleep
+from typing import List, Tuple
 import inspect
 import pytz
 import requests
@@ -59,7 +60,8 @@ class PVLive:
         ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
         return ggd_lookup
 
-    def latest(self, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False):
+    def latest(self, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False) \
+            -> Union[Tuple, pd.DataFrame]:
         """
         Get the latest PV_Live generation result from the API.
 
@@ -107,7 +109,7 @@ class PVLive:
         return None
 
     def at_time(self, dt, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                dataframe=False):
+                dataframe=False) -> Union[Tuple, pd.DataFrame]:
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -149,7 +151,7 @@ class PVLive:
         return tuple(result[0])
 
     def between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                dataframe=False):
+                dataframe=False) -> Union[List, pd.DataFrame]:
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -190,7 +192,7 @@ class PVLive:
         return self._between(start, end, entity_type, entity_id, extra_fields, period, dataframe)[0]
 
     def day_peak(self, d, entity_type="pes", entity_id=0, extra_fields="", period=30,
-                 dataframe=False):
+                 dataframe=False) -> Union[Tuple, pd.DataFrame]:
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -242,7 +244,7 @@ class PVLive:
             return maxdata
         return None
 
-    def day_energy(self, d, entity_type="pes", entity_id=0):
+    def day_energy(self, d, entity_type="pes", entity_id=0) -> float:
         """
         Get the cumulative PV generation for a given day from the API.
 
