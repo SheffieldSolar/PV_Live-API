@@ -45,7 +45,7 @@ class PVLive:
         Optionally specify the number of retries to use should the API respond with anything
         other than status code 200. Exponential back-off applies inbetween retries.
     """
-    def __init__(self, retries=3):
+    def __init__(self, retries: int = 3):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/v3/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
@@ -60,12 +60,12 @@ class PVLive:
         ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
         return ggd_lookup
 
-    def latest(self, entity_type: str = "pes",
+    def latest(self,
+               entity_type: str = "pes",
                entity_id: int = 0,
                extra_fields: str = "",
                period: int = 30,
-               dataframe: pd.DataFrame = False) \
-            -> Union[Tuple, pd.DataFrame]:
+               dataframe: bool = False) -> Union[Tuple, pd.DataFrame]:
         """
         Get the latest PV_Live generation result from the API.
 
@@ -112,12 +112,13 @@ class PVLive:
             return data
         return None
 
-    def at_time(self, dt: datetime,
+    def at_time(self,
+                dt: datetime,
                 entity_type: str = "pes",
                 entity_id: int = 0,
-                extra_fields:str = "",
+                extra_fields: str = "",
                 period: int = 30,
-                dataframe:pd.DataFrame = False) -> Union[Tuple, pd.DataFrame]:
+                dataframe: bool = False) -> Union[Tuple, pd.DataFrame]:
         """
         Get the PV_Live generation result for a given time from the API.
 
@@ -158,12 +159,14 @@ class PVLive:
             return result
         return tuple(result[0])
 
-    def between(self, start: datetime,
+    def between(self,
+                start: datetime,
                 end: datetime,
-                entity_type:str = "pes",
+                entity_type: str = "pes",
                 entity_id: int = 0,
-                extra_fields: str = "", period: int = 30,
-                dataframe: pd.DataFrame = False) -> Union[List, pd.DataFrame]:
+                extra_fields: str = "",
+                period: int = 30,
+                dataframe: bool = False) -> Union[List, pd.DataFrame]:
         """
         Get the PV_Live generation result for a given time interval from the API.
 
@@ -203,12 +206,13 @@ class PVLive:
         """
         return self._between(start, end, entity_type, entity_id, extra_fields, period, dataframe)[0]
 
-    def day_peak(self, d: date,
+    def day_peak(self,
+                 d: date,
                  entity_type: str = "pes",
                  entity_id: int = 0,
                  extra_fields: str = "",
-                 period:int = 30,
-                 dataframe: pd.DataFrame = False) -> Union[Tuple, pd.DataFrame]:
+                 period: int = 30,
+                 dataframe: bool = False) -> Union[Tuple, pd.DataFrame]:
         """
         Get the peak PV_Live generation result for a given day from the API.
 
@@ -260,7 +264,7 @@ class PVLive:
             return maxdata
         return None
 
-    def day_energy(self, d: date, entity_type:str="pes", entity_id: int = 0) -> float:
+    def day_energy(self, d: date, entity_type: str = "pes", entity_id: int = 0) -> float:
         """
         Get the cumulative PV generation for a given day from the API.
 
