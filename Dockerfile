@@ -10,7 +10,7 @@ RUN apt-get -qq update && apt-get -qq install -y \
     wget \
     > /dev/null
 
-RUN pip install --no-cache-dir git+https://github.com/SheffieldSolar/PV_Live-API.git@0.9 > /dev/null
+RUN pip install --no-cache-dir git+https://github.com/SheffieldSolar/PV_Live-API.git@0.10 > /dev/null
 
 #RUN pip install --no-cache-dir -r /pv_live/requirements.txt > /dev/null
 #COPY . /pv_live/
