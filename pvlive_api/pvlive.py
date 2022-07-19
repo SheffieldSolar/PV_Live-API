@@ -55,7 +55,7 @@ class PVLive:
 
     def _get_ggd_lookup(self):
         """Fetch the GGD lookup from the API and convert to Pandas DataFrame."""
-        url = f"{self.base_url}ggd_list"
+        url = f"{self.base_url}gsp_list"
         response = self._fetch_url(url)
         ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
         return ggd_lookup
