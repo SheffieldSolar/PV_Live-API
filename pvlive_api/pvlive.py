@@ -46,7 +46,7 @@ class PVLive:
         other than status code 200. Exponential back-off applies inbetween retries.
     """
     def __init__(self, retries: int = 3):
-        self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/v4/"
+        self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.ggd_lookup = self._get_ggd_lookup()
@@ -55,7 +55,7 @@ class PVLive:
 
     def _get_ggd_lookup(self):
         """Fetch the GGD lookup from the API and convert to Pandas DataFrame."""
-        url = "https://api0.solar.sheffield.ac.uk/pvlive/v4/ggd_list"
+        url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/ggd_list"
         response = self._fetch_url(url)
         ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
         return ggd_lookup
