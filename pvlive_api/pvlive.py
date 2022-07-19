@@ -5,7 +5,8 @@ A Python interface for the PV_Live web API from Sheffield Solar.
 - Ethan Jones <ejones18@sheffield.ac.uk>
 - First Authored: 2018-06-04
 - Updated: 2020-10-20 to return Pandas dataframe object
-- Updated: 2021-01-15 to use v3 of the PV_Live APi and expose GSP endpoints as well as PES
+- Updated: 2021-01-15 to use v3 of the PV_Live API and expose GSP endpoints as well as PES
+- Updated: 2022-07-19 to use v4 of the PV_Live API
 """
 
 import sys
@@ -46,22 +47,28 @@ class PVLive:
         other than status code 200. Exponential back-off applies inbetween retries.
     """
     def __init__(self, retries: int = 3):
-        self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/v3/"
+        self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
-        self.ggd_lookup = self._get_ggd_lookup()
-        self.gsp_ids = self.ggd_lookup.gsp_id.dropna().astype(int64).unique()
-        self.pes_ids = self.ggd_lookup.pes_id.dropna().astype(int64).unique()
+        self.gsp_list = self._get_gsp_list()
+        self.pes_list = self._get_pes_list()
+        self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
+        self.pes_ids = self.pes_list.pes_id.dropna().astype(int64).unique()
 
-    def _get_ggd_lookup(self):
-        """Fetch the GGD lookup from the API and convert to Pandas DataFrame."""
-        url = "https://api0.solar.sheffield.ac.uk/pvlive/v3/ggd_list"
+    def _get_gsp_list(self):
+        """Fetch the GSP list from the API and convert to Pandas DataFrame."""
+        url = f"{self.base_url}/gsp_list"
         response = self._fetch_url(url)
-        ggd_lookup = pd.DataFrame(response["data"], columns=response["meta"])
-        return ggd_lookup
+        return pd.DataFrame(response["data"], columns=response["meta"])
+
+    def _get_pes_list(self):
+        """Fetch the PES list from the API and convert to Pandas DataFrame."""
+        url = f"{self.base_url}/pes_list"
+        response = self._fetch_url(url)
+        return pd.DataFrame(response["data"], columns=response["meta"])
 
     def latest(self,
-               entity_type: str = "pes",
+               entity_type: str = "gsp",
                entity_id: int = 0,
                extra_fields: str = "",
                period: int = 30,
@@ -72,7 +79,7 @@ class PVLive:
         Parameters
         ----------
         `entity_type` : string
-            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "pes".
+            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
         `entity_id` : int
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
@@ -105,7 +112,7 @@ class PVLive:
         params = self._compile_params(extra_fields, period=period)
         response = self._query_api(entity_type, entity_id, params)
         if response["data"]:
-            data, meta = self._remove_n_ggds(response["data"], response["meta"])
+            data, meta = response["data"], response["meta"]
             data = tuple(data[0])
             if dataframe:
                 return self._convert_tuple_to_df(data, meta)
@@ -114,7 +121,7 @@ class PVLive:
 
     def at_time(self,
                 dt: datetime,
-                entity_type: str = "pes",
+                entity_type: str = "gsp",
                 entity_id: int = 0,
                 extra_fields: str = "",
                 period: int = 30,
@@ -128,7 +135,7 @@ class PVLive:
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *dt* falls, since Sheffield Solar use end of interval as convention.
         `entity_type` : string
-            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "pes".
+            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
         `entity_id` : int
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
@@ -162,7 +169,7 @@ class PVLive:
     def between(self,
                 start: datetime,
                 end: datetime,
-                entity_type: str = "pes",
+                entity_type: str = "gsp",
                 entity_id: int = 0,
                 extra_fields: str = "",
                 period: int = 30,
@@ -179,7 +186,7 @@ class PVLive:
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *end* falls, since Sheffield Solar use end of interval as convention.
         `entity_type` : string
-            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "pes".
+            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
         `entity_id` : int
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
@@ -208,7 +215,7 @@ class PVLive:
 
     def day_peak(self,
                  d: date,
-                 entity_type: str = "pes",
+                 entity_type: str = "gsp",
                  entity_id: int = 0,
                  extra_fields: str = "",
                  period: int = 30,
@@ -221,7 +228,7 @@ class PVLive:
         `d` : date
             The day of interest as a date object.
         `entity_type` : string
-            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "pes".
+            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
         `entity_id` : int
             The numerical ID of the entity of interest. Defaults to 0.
         `extra_fields` : string
@@ -264,7 +271,7 @@ class PVLive:
             return maxdata
         return None
 
-    def day_energy(self, d: date, entity_type: str = "pes", entity_id: int = 0) -> float:
+    def day_energy(self, d: date, entity_type: str = "gsp", entity_id: int = 0) -> float:
         """
         Get the cumulative PV generation for a given day from the API.
 
@@ -273,7 +280,7 @@ class PVLive:
         `d` : date
             The day of interest as a date object.
         `entity_type` : string
-            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "pes".
+            The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
         `entity_id` : int
             The numerical ID of the entity of interest. Defaults to 0.
 
@@ -296,7 +303,7 @@ class PVLive:
             return pv_energy
         return None
 
-    def _between(self, start, end, entity_type="pes", entity_id=0, extra_fields="", period=30,
+    def _between(self, start, end, entity_type="gsp", entity_id=0, extra_fields="", period=30,
                  dataframe=False):
         """
         Get the PV_Live generation result for a given time interval from the API, returning both the
@@ -322,19 +329,9 @@ class PVLive:
             response = self._query_api(entity_type, entity_id, params)
             data += response["data"]
             request_start += max_range + timedelta(minutes=period)
-        data, meta = self._remove_n_ggds(data, response["meta"])
         if dataframe:
-            return self._convert_tuple_to_df(data, meta), meta
-        return data, meta
-
-    @staticmethod
-    def _remove_n_ggds(data, meta):
-        """Remove the n_ggds column from the API response (not useful for most users)."""
-        if "n_ggds" in meta:
-            ind = meta.index("n_ggds")
-            data = [d[:ind] + d[ind + 1:] for d in data]
-            meta.remove("n_ggds")
-        return data, meta
+            return self._convert_tuple_to_df(data, response["meta"]), response["meta"]
+        return data, response["meta"]
 
     def _compile_params(self, extra_fields="", start=None, end=None, period=30):
         """Compile parameters into a Python dict, formatting where necessary."""
@@ -361,7 +358,7 @@ class PVLive:
         data = pd.DataFrame(data, columns=columns)
         if "datetime_gmt" in data.columns:
             data.datetime_gmt = pd.to_datetime(data.datetime_gmt)
-        return data.drop(columns="n_ggds", errors="ignore")
+        return data
 
     def _build_url(self, entity_type, entity_id, params):
         """Construct the appropriate URL for a given set of parameters."""
@@ -398,7 +395,7 @@ class PVLive:
                                 microseconds=dt.microsecond) + timedelta(minutes=period)
         return dt
 
-    def _validate_inputs(self, entity_type="pes", entity_id=0, extra_fields="", period=30):
+    def _validate_inputs(self, entity_type="gsp", entity_id=0, extra_fields="", period=30):
         """Validate common input parameters."""
         if not isinstance(entity_type, str):
             raise TypeError("The entity_type must be a string.")
@@ -432,7 +429,7 @@ def parse_options():
                         help="Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), "
                         "default behaviour is to retrieve the latest outturn.")
     parser.add_argument("--entity_type", metavar="<entity_type>", dest="entity_type",
-                        action="store", type=str, required=False, default="pes",
+                        action="store", type=str, required=False, default="gsp",
                         choices=["gsp", "pes"],
                         help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.")
     parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",

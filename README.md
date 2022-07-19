@@ -2,9 +2,9 @@
 # PV_Live
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
-**Latest Version: 0.10**
+**Latest Version: 0.11**
 
-**New! Updated 2021-09-09 to include support for accessing 5 minutely PV_Live outturns.**
+**New! Updated 2022-07-19 to use the v4 PV_Live API.**
 
 ## About this repository
 
