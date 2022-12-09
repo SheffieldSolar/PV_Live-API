@@ -22,13 +22,16 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.11",
+    version="0.12",
 
     description="A Python interface for the PV_Live web API from Sheffield Solar.",
     long_description=long_description,
+    long_description_content_type="text/markdown",
 
     # The project's main homepage.
     url="https://github.com/SheffieldSolar/PV_Live",
+
+    download_url="https://github.com/SheffieldSolar/PV_Live-API/archive/refs/tags/0.12.tar.gz",
 
     # Author details
     author="Jamie Taylor",
@@ -57,8 +60,7 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
