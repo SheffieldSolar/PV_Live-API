@@ -2,9 +2,9 @@
 # PV_Live
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
-**Latest Version: 0.11**
+**Latest Version: 0.12**
 
-**New! Updated 2022-07-19 to use the v4 PV_Live API.**
+**New! Updated 2022-12-10 to provide support for proxy connections.**
 
 ## About this repository
 
@@ -94,17 +94,19 @@ This utility can be used to download data to a CSV file:
 
 ```
 >> pv_live -h
-usage: pvlive.py [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"] [--entity_type <entity_type>] [--entity_id <entity_id>]
-                 [--period <5|30>] [-q] [-o </path/to/output/file>]
+usage: pvlive.py [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"] [--entity_type <entity_type>]
+                 [--entity_id <entity_id>] [--period <5|30>] [-q] [-o </path/to/output/file>] [-p <proxies> <proxies>]
 
 This is a command line interface (CLI) for the PV_Live API module
 
 optional arguments:
   -h, --help            show this help message and exit
   -s "<yyyy-mm-dd HH:MM:SS>", --start "<yyyy-mm-dd HH:MM:SS>"
-                        Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest outturn.
+                        Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the
+                        latest outturn.
   -e "<yyyy-mm-dd HH:MM:SS>", --end "<yyyy-mm-dd HH:MM:SS>"
-                        Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the latest outturn.
+                        Specify a UTC end date in 'yyyy-mm-dd HH:MM:SS' format (inclusive), default behaviour is to retrieve the
+                        latest outturn.
   --entity_type <entity_type>
                         Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.
   --entity_id <entity_id>
@@ -113,8 +115,11 @@ optional arguments:
   -q, --quiet           Specify to not print anything to stdout.
   -o </path/to/output/file>, --outfile </path/to/output/file>
                         Specify a CSV file to write results to.
+  -p <proxies> <proxies>, --proxies <proxies> <proxies>
+                        Proxy addresses in the order of http and https requests separated by a whitespace e.g. -p
+                        http://10.10.1.10:3128 http://10.10.1.10:1080
 
-Jamie Taylor, 2018-06-04
+Jamie Taylor & Ethan Jones, 2018-06-04
 ```
 
 ## Using the Docker Image

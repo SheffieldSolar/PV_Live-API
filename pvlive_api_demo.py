@@ -13,7 +13,6 @@ import pytz
 
 from pvlive_api import PVLive
 
-
 def main():
     """
     Demo API's functionality.
@@ -112,7 +111,6 @@ def main():
     print(pvlive.day_peak(date(2019, 3, 18), entity_type="gsp", entity_id=120, dataframe=True))
     print("\nGSP ID 120 cumulative generation on 2019-03-18: ")
     print(pvlive.day_energy(date(2019, 3, 18), entity_type="gsp", entity_id=120))
-
 
 if __name__ == "__main__":
     main()
