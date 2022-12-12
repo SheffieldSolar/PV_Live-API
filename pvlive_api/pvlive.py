@@ -46,9 +46,8 @@ class PVLive:
         Optionally specify the number of retries to use should the API respond with anything
         other than status code 200. Exponential back-off applies inbetween retries.
     `proxies` : Dict
-        Optionally specify a Dict of proxies for http and https requests in the format seen here:
-        https://requests.readthedocs.io/en/latest/user/advanced/#proxies i.e. {"http": "<address>",
-        "https": "<address>"}
+        Optionally specify a Dict of proxies for http and https requests in the format:
+        {"http": "<address>", "https": "<address>"}
     """
     def __init__(self, proxies: Dict, retries: int = 3):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
@@ -437,7 +436,7 @@ def parse_options():
     parser.add_argument("--entity_type", metavar="<entity_type>", dest="entity_type",
                         action="store", type=str, required=False, default="gsp",
                         choices=["gsp", "pes"],
-                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.")
+                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'gsp'.")
     parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
                         type=int, required=False, default=0,
                         help="Specify an entity ID, default is 0 (i.e. national).")
@@ -450,10 +449,12 @@ def parse_options():
     parser.add_argument("-o", "--outfile", metavar="</path/to/output/file>", dest="outfile",
                         action="store", type=str, required=False,
                         help="Specify a CSV file to write results to.")
-    parser.add_argument('-p', '--proxies', metavar="<proxies>", dest="proxies",
-                        type=str, required=False, default=None, action="store", nargs=2,
-                        help="Proxy addresses in the order of http and https requests separated by "
-                             "a whitespace e.g. -p http://10.10.1.10:3128 http://10.10.1.10:1080")
+    parser.add_argument('-http', '-http-proxy', metavar="<http_proxy>", dest="http",
+                        type=str, required=False, default=None, action="store",
+                        help="HTTP Proxy address")
+    parser.add_argument('-https', '-https-proxy', metavar="<https_proxy>", dest="https",
+                        type=str, required=False, default=None, action="store",
+                        help="HTTPS Proxy address")
     options = parser.parse_args()
 
     def handle_options(options):
@@ -481,8 +482,12 @@ def parse_options():
             except:
                 raise Exception("OptionsError: Failed to parse end datetime, make sure you use "
                                 "'yyyy-mm-dd HH:MM:SS' format.")
-        if options.proxies is not None:
-            options.proxies = {"http": options.proxies[0], "https": options.proxies[1]}
+        proxies = {}
+        if options.http is not None:
+            proxies.update({"http": options.http})
+        if options.https is not None:
+            proxies.update({"https": options.https})
+        options.proxies = proxies
         return options
     return handle_options(options)
 
