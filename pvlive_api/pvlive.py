@@ -49,7 +49,7 @@ class PVLive:
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
     """
-    def __init__(self, proxies: Dict, retries: int = 3):
+    def __init__(self, proxies: Dict = None, retries: int = 3):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
