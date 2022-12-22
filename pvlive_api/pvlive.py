@@ -7,7 +7,7 @@ A Python interface for the PV_Live web API from Sheffield Solar.
 - Updated: 2020-10-20 to return Pandas dataframe object
 - Updated: 2021-01-15 to use v3 of the PV_Live API and expose GSP endpoints as well as PES
 - Updated: 2022-07-19 to use v4 of the PV_Live API
-- Updated: 2022-10-12 to provide support for proxy connections.
+- Updated: 2022-12-22 to provide support for proxy connections.
 """
 
 import sys
@@ -49,13 +49,11 @@ class PVLive:
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
     """
-    def __init__(self, proxies: Dict = None, retries: int = 3):
+    def __init__(self, retries: int = 3, proxies: Dict = None):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
-        self.requests_session = requests.Session()
-        if proxies is not None:
-            self.requests_session.proxies.update(proxies)
+        self.proxies = proxies
         self.gsp_list = self._get_gsp_list()
         self.pes_list = self._get_pes_list()
         self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
@@ -380,7 +378,7 @@ class PVLive:
         while not success and try_counter < self.retries + 1:
             try_counter += 1
             try:
-                page = self.requests_session.get(url)
+                page = requests.get(url, proxies=self.proxies)
                 page.raise_for_status()
                 success = True
             except requests.exceptions.HTTPError:
@@ -494,7 +492,7 @@ def parse_options():
 def main():
     """Load CLI options and access the API accordingly."""
     options = parse_options()
-    pvl = PVLive(options.proxies)
+    pvl = PVLive(proxies=options.proxies)
     if options.start is None and options.end is None:
         data = pvl.latest(entity_type=options.entity_type, entity_id=options.entity_id,
                           extra_fields="installedcapacity_mwp", dataframe=True)
