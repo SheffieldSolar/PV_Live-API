@@ -14,7 +14,9 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 ## How do I get set up?
 
 * Make sure you have Git installed - [Download Git](https://git-scm.com/downloads)
-* Run `pip install git+https://github.com/SheffieldSolar/PV_Live-API`
+* Run either:
+    * `pip install pvlive-api`
+    * `pip install git+https://github.com/SheffieldSolar/PV_Live-API`
 
 ## Usage
 
