@@ -14,7 +14,9 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 ## How do I get set up?
 
 * Make sure you have Git installed - [Download Git](https://git-scm.com/downloads)
-* Run `pip install git+https://github.com/SheffieldSolar/PV_Live-API`
+* Run either:
+    * `pip install pvlive-api`
+    * `pip install git+https://github.com/SheffieldSolar/PV_Live-API`
 
 ## Usage
 
@@ -148,6 +150,34 @@ Sheffield Solar will endeavour to update this library in sync with the [PV_Live 
 
 To upgrade the code:
 * Run `pip install --upgrade git+https://github.com/SheffieldSolar/PV_Live-API`
+
+## Notes on PV_Live GB national update cycle
+
+Users should be aware that Sheffield Solar computes continuous retrospective updates to PV_Live outturn estimates i.e. we regularly re-calculate outturn estimates retrospectively and these updated estimates are reflected immediately in the data delivered via the API.
+
+As of 2023-05-02, the first estimate of the PV outturn for a given settlement period is computed ~5 minutes after the end of the half hour in question and is typically available via the API within 6 minutes
+
+e.g. the initial estimate of the GB PV outturn for the period 14:30 - 15:00 UTC on 2023-05-02 (i.e. 15:30 - 16:00 BST) would become available at ~16:06 BST on 2023-05-02 and will be labelled using the timestamp at the end of the interval (in UTC): '2023-05-02 15:00:00'
+
+This outturn estimate is not final though - Sheffield Solar will continue to make retrospective revisions as
+
+- more PV sample data becomes available
+- better PV deployment data becomes available
+- the PV_Live methodology is refined
+
+Since the PV_Live model produces outturn estimates, they will never strictly speaking be final, as there will always be things we can do to refine the model and improve accuracy. That said, there are some notable/routine retrospective revisions to be aware of:
+
+- Outturns are re-computed in near-real-time every 5 minutes after the end of the half-hour for 3 hours, to allow for late arriving sample data
+    - If all data ingestion pipelines are running smoothly, this does not result in any retrospective revisions
+    - If some near-real-time sample data is late arriving, the outturn estimate will be revised at the next update
+- Outturns are re-computed on day+1 (typically between 10:30 and 10:35 and again between 22:30 and 22:35) to make use of sample data which only becomes available on day+1
+- Historical outturns may be re-computed periodically whenever our PV deployment dataset is updated retrospectively (usually every 3 - 6 months)
+
+In order to maintain a local copy of the PV_Live GB national outturn estimates that is as in sync with our own latest/best estimates as possible, we recommend the following polling cycle:
+
+- Every 5 minutes, pull the last 3 hours of outturns from the API
+- Every day, around 11am, re-download the previous 3 days of outturns
+- Every month, re-download all historical outturns
 
 ## Who do I talk to?
 

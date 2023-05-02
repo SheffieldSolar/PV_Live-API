@@ -31,6 +31,8 @@ setup(
     # The project's main homepage.
     url="https://github.com/SheffieldSolar/PV_Live",
 
+    download_url="https://github.com/SheffieldSolar/PV_Live-API/archive/refs/tags/0.12.tar.gz",
+
     # Author details
     author="Jamie Taylor",
     author_email="jamie.taylor@sheffield.ac.uk",
@@ -62,6 +64,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 
     # What does your project relate to?
