@@ -4,9 +4,6 @@ A Python interface for the PV_Live web API from Sheffield Solar.
 - Jamie Taylor <jamie.taylor@sheffield.ac.uk>
 - Ethan Jones <ejones18@sheffield.ac.uk>
 - First Authored: 2018-06-04
-- Updated: 2020-10-20 to return Pandas dataframe object
-- Updated: 2021-01-15 to use v3 of the PV_Live API and expose GSP endpoints as well as PES
-- Updated: 2022-07-19 to use v4 of the PV_Live API
 """
 
 import sys
@@ -14,14 +11,14 @@ import os
 import json
 from datetime import datetime, timedelta, date, time
 from time import sleep
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict, Optional
 import inspect
+import argparse
+
 import pytz
 import requests
-import argparse
 from numpy import nan, int64
 import pandas as pd
-
 
 class PVLiveException(Exception):
     """An Exception specific to the PVLive class."""
@@ -30,11 +27,10 @@ class PVLiveException(Exception):
             caller_file = inspect.stack()[2][1]
         except:
             caller_file = os.path.basename(__file__)
-        self.msg = "%s (in '%s')" % (msg, caller_file)
+        self.msg = f"{msg} (in '{caller_file}')"
 
     def __str__(self):
         return self.msg
-
 
 class PVLive:
     """
@@ -45,11 +41,15 @@ class PVLive:
     `retries` : int
         Optionally specify the number of retries to use should the API respond with anything
         other than status code 200. Exponential back-off applies inbetween retries.
+    `proxies` : Optional[Dict]
+        Optionally specify a Dict of proxies for http and https requests in the format:
+        {"http": "<address>", "https": "<address>"}
     """
-    def __init__(self, retries: int = 3):
+    def __init__(self, retries: int = 3, proxies: Optional[Dict] = None):
         self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
+        self.proxies = proxies
         self.gsp_list = self._get_gsp_list()
         self.pes_list = self._get_pes_list()
         self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
@@ -362,7 +362,7 @@ class PVLive:
 
     def _build_url(self, entity_type, entity_id, params):
         """Construct the appropriate URL for a given set of parameters."""
-        base_url = "{}{}/{}".format(self.base_url, entity_type, entity_id)
+        base_url = f"{self.base_url}{entity_type}/{entity_id}"
         url = base_url + "?" + "&".join(["{}={}".format(k, params[k]) for k in params])
         return url
 
@@ -374,7 +374,7 @@ class PVLive:
         while not success and try_counter < self.retries + 1:
             try_counter += 1
             try:
-                page = requests.get(url)
+                page = requests.get(url, proxies=self.proxies)
                 page.raise_for_status()
                 success = True
             except requests.exceptions.HTTPError:
@@ -414,12 +414,11 @@ class PVLive:
             raise ValueError("The period parameter must be one of: "
                              f"{', '.join(map(str, periods))}.")
 
-
 def parse_options():
     """Parse command line options."""
     parser = argparse.ArgumentParser(description=("This is a command line interface (CLI) for the "
                                                   "PV_Live API module"),
-                                     epilog="Jamie Taylor, 2018-06-04")
+                                     epilog="Jamie Taylor & Ethan Jones, 2018-06-04")
     parser.add_argument("-s", "--start", metavar="\"<yyyy-mm-dd HH:MM:SS>\"", dest="start",
                         action="store", type=str, required=False, default=None,
                         help="Specify a UTC start date in 'yyyy-mm-dd HH:MM:SS' format "
@@ -431,7 +430,7 @@ def parse_options():
     parser.add_argument("--entity_type", metavar="<entity_type>", dest="entity_type",
                         action="store", type=str, required=False, default="gsp",
                         choices=["gsp", "pes"],
-                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'pes'.")
+                        help="Specify an entity type, either 'gsp' or 'pes'. Default is 'gsp'.")
     parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
                         type=int, required=False, default=0,
                         help="Specify an entity ID, default is 0 (i.e. national).")
@@ -444,6 +443,12 @@ def parse_options():
     parser.add_argument("-o", "--outfile", metavar="</path/to/output/file>", dest="outfile",
                         action="store", type=str, required=False,
                         help="Specify a CSV file to write results to.")
+    parser.add_argument('-http', '--http-proxy', metavar="<http_proxy>", dest="http",
+                        type=str, required=False, default=None, action="store",
+                        help="HTTP Proxy address")
+    parser.add_argument('-https', '--https-proxy', metavar="<https_proxy>", dest="https",
+                        type=str, required=False, default=None, action="store",
+                        help="HTTPS Proxy address")
     options = parser.parse_args()
 
     def handle_options(options):
@@ -471,14 +476,19 @@ def parse_options():
             except:
                 raise Exception("OptionsError: Failed to parse end datetime, make sure you use "
                                 "'yyyy-mm-dd HH:MM:SS' format.")
+        proxies = {} if options.http is not None or options.https is not None else None
+        if options.http is not None:
+            proxies.update({"http": options.http})
+        if options.https is not None:
+            proxies.update({"https": options.https})
+        options.proxies = proxies
         return options
     return handle_options(options)
-
 
 def main():
     """Load CLI options and access the API accordingly."""
     options = parse_options()
-    pvl = PVLive()
+    pvl = PVLive(proxies=options.proxies)
     if options.start is None and options.end is None:
         data = pvl.latest(entity_type=options.entity_type, entity_id=options.entity_id,
                           extra_fields="installedcapacity_mwp", dataframe=True)
@@ -493,7 +503,6 @@ def main():
         data.to_csv(options.outfile, float_format="%.3f", index=False)
     if not options.quiet:
         print(data)
-
 
 if __name__ == "__main__":
     main()
