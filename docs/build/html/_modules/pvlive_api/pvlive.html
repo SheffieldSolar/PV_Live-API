@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pvlive_api.pvlive &mdash; PV_Live API 1.0.0 documentation</title>
+  <title>pvlive_api.pvlive &mdash; PV_Live API 1.1.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             PV_Live API
           </a>
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -89,6 +89,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">import</span> <span class="nn">pytz</span>
 <span class="kn">import</span> <span class="nn">requests</span>
@@ -452,7 +453,10 @@
                 <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
                 <span class="n">page</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
                 <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">:</span>
+            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">page</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+                    <span class="n">helper</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&lt;p&gt;(.*)&lt;/p&gt;&quot;</span><span class="p">,</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">PVLiveException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PV_Live API received Bad Request (400)... </span><span class="si">{</span><span class="n">helper</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
                 <span class="n">delay</span> <span class="o">*=</span> <span class="mi">2</span>
                 <span class="k">continue</span>
@@ -509,6 +513,10 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--entity_id&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;entity_id&gt;&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;entity_id&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specify an entity ID, default is 0 (i.e. national).&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--extra_fields&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;field1[,field2, ...]&gt;&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;extra_fields&quot;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;installedcapacity_mwp&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Specify an extra_fields (as a comma-separated list to include when &quot;</span>
+                             <span class="s2">&quot;requesting data from the API, defaults to &#39;installedcapacity_mwp&#39;.&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--period&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;5|30&gt;&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;period&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Desired temporal resolution (in minutes) for PV outturn estimates. &quot;</span>
@@ -566,13 +574,13 @@
     <span class="n">pvl</span> <span class="o">=</span> <span class="n">PVLive</span><span class="p">(</span><span class="n">proxies</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pvl</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">entity_type</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
-                          <span class="n">extra_fields</span><span class="o">=</span><span class="s2">&quot;installedcapacity_mwp&quot;</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                          <span class="n">extra_fields</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">extra_fields</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2014</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> \
             <span class="k">else</span> <span class="n">options</span><span class="o">.</span><span class="n">start</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">options</span><span class="o">.</span><span class="n">end</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pvl</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
-                           <span class="n">extra_fields</span><span class="o">=</span><span class="s2">&quot;installedcapacity_mwp&quot;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">period</span><span class="p">,</span>
+                           <span class="n">extra_fields</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">extra_fields</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">period</span><span class="p">,</span>
                            <span class="n">dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">outfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

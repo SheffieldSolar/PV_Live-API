@@ -14,6 +14,7 @@ from time import sleep
 from typing import List, Union, Tuple, Dict, Optional
 import inspect
 import argparse
+import re
 
 import pytz
 import requests
@@ -377,7 +378,10 @@ class PVLive:
                 page = requests.get(url, proxies=self.proxies)
                 page.raise_for_status()
                 success = True
-            except requests.exceptions.HTTPError:
+            except requests.exceptions.HTTPError as err:
+                if page.status_code == 400:
+                    helper = re.search(r"<p>(.*)</p>", page.text).group(1)
+                    raise PVLiveException(f"PV_Live API received Bad Request (400)... {helper}")
                 sleep(delay)
                 delay *= 2
                 continue
@@ -434,6 +438,10 @@ def parse_options():
     parser.add_argument("--entity_id", metavar="<entity_id>", dest="entity_id", action="store",
                         type=int, required=False, default=0,
                         help="Specify an entity ID, default is 0 (i.e. national).")
+    parser.add_argument("--extra_fields", metavar="<field1[,field2, ...]>", dest="extra_fields",
+                        action="store", type=str, required=False, default="installedcapacity_mwp",
+                        help="Specify an extra_fields (as a comma-separated list to include when "
+                             "requesting data from the API, defaults to 'installedcapacity_mwp'.")
     parser.add_argument("--period", metavar="<5|30>", dest="period", action="store",
                         type=int, required=False, default=30, choices=(5, 30),
                         help="Desired temporal resolution (in minutes) for PV outturn estimates. "
@@ -491,13 +499,13 @@ def main():
     pvl = PVLive(proxies=options.proxies)
     if options.start is None and options.end is None:
         data = pvl.latest(entity_type=options.entity_type, entity_id=options.entity_id,
-                          extra_fields="installedcapacity_mwp", dataframe=True)
+                          extra_fields=options.extra_fields, dataframe=True)
     else:
         start = datetime(2014, 1, 1, 0, 30, tzinfo=pytz.utc) if options.start is None \
             else options.start
         end = pytz.utc.localize(datetime.utcnow()) if options.end is None else options.end
         data = pvl.between(start, end, entity_type=options.entity_type, entity_id=options.entity_id,
-                           extra_fields="installedcapacity_mwp", period=options.period,
+                           extra_fields=options.extra_fields, period=options.period,
                            dataframe=True)
     if options.outfile is not None:
         data.to_csv(options.outfile, float_format="%.3f", index=False)
