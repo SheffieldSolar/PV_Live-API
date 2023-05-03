@@ -97,8 +97,9 @@ This utility can be used to download data to a CSV file:
 ```
 >> pv_live -h
 usage: pv_live [-h] [-s "<yyyy-mm-dd HH:MM:SS>"] [-e "<yyyy-mm-dd HH:MM:SS>"]
-               [--entity_type <entity_type>] [--entity_id <entity_id>] [--period <5|30>]
-               [-q] [-o </path/to/output/file>] [-http <http_proxy>] [-https <https_proxy>]
+               [--entity_type <entity_type>] [--entity_id <entity_id>]
+               [--extra_fields <field1[,field2, ...]>] [--period <5|30>] [-q]
+               [-o </path/to/output/file>] [-http <http_proxy>] [-https <https_proxy>]
 
 This is a command line interface (CLI) for the PV_Live API module
 
@@ -114,6 +115,9 @@ options:
                         Specify an entity type, either 'gsp' or 'pes'. Default is 'gsp'.
   --entity_id <entity_id>
                         Specify an entity ID, default is 0 (i.e. national).
+  --extra_fields <field1[,field2, ...]>
+                        Specify an extra_fields (as a comma-separated list to include when
+                        requesting data from the API, defaults to 'installedcapacity_mwp'.
   --period <5|30>       Desired temporal resolution (in minutes) for PV outturn estimates.
                         Default is 30.
   -q, --quiet           Specify to not print anything to stdout.
