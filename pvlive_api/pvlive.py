@@ -46,11 +46,13 @@ class PVLive:
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
     """
-    def __init__(self, retries: int = 3, proxies: Optional[Dict] = None):
+    def __init__(self, retries: int = 3, proxies: Optional[Dict] = None, ssl_verify: bool = True):
         self.base_url = "https://api.solar.sheffield.ac.uk/pvlive/api/v4"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.proxies = proxies
+        self.ssl_verify = ssl_verify
+        self.timeout = 30
         self.gsp_list = self._get_gsp_list()
         self.pes_list = self._get_pes_list()
         self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
@@ -375,7 +377,8 @@ class PVLive:
         while not success and try_counter < self.retries + 1:
             try_counter += 1
             try:
-                page = requests.get(url, proxies=self.proxies)
+                page = requests.get(url, proxies=self.proxies, verify=self.ssl_verify,
+                                    timeout=self.timeout)
                 page.raise_for_status()
                 success = True
             except requests.exceptions.HTTPError as err:
