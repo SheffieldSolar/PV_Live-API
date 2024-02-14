@@ -47,7 +47,7 @@ class PVLive:
         {"http": "<address>", "https": "<address>"}
     """
     def __init__(self, retries: int = 3, proxies: Optional[Dict] = None):
-        self.base_url = "https://api0.solar.sheffield.ac.uk/pvlive/api/v4/"
+        self.base_url = "https://api.solar.sheffield.ac.uk/pvlive/api/v4"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.proxies = proxies
@@ -363,7 +363,7 @@ class PVLive:
 
     def _build_url(self, entity_type, entity_id, params):
         """Construct the appropriate URL for a given set of parameters."""
-        base_url = f"{self.base_url}{entity_type}/{entity_id}"
+        base_url = f"{self.base_url}/{entity_type}/{entity_id}"
         url = base_url + "?" + "&".join(["{}={}".format(k, params[k]) for k in params])
         return url
 
