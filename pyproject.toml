@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pvlive_api"
+version = "1.2.2"
+dynamic = ["dependencies"]
+requires-python = ">=3.10"
+authors = [
+  {name="Jamie Taylor", email="jamie.taylor@sheffield.ac.uk"},
+]
+maintainers = [
+  {name="Jamie Taylor", email="jamie.taylor@sheffield.ac.uk"},
+]
+description = "A Python interface for the PV_Live web API from Sheffield Solar."
+readme = "README.md"
+#license = {file = "LICENSE.txt"}
+keywords = ["solar", "pv", "pv_live", "api"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Utilities",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+#[project.optional-dependencies]
+
+[project.urls]
+Homepage = "https://www.solar.sheffield.ac.uk/pvlive/"
+Documentation = "https://sheffieldsolar.github.io/PV_Live-API/build/html/index.html"
+Repository = "https://github.com/SheffieldSolar/PV_Live-API"
+"Bug Tracker" = "https://github.com/SheffieldSolar/PV_Live-API/issues"
+
+[project.scripts]
+pv_live = "pvlive_api.pvlive:main"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = {file = ["requirements_dev.txt"]}}
+
+[tool.setuptools.packages.find]
+#include = []
+exclude = ["Tests*", "misc*"]

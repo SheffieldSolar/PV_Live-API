@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pvlive_api.pvlive &mdash; PV_Live API 1.1.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -96,7 +98,9 @@
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span><span class="p">,</span> <span class="n">int64</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<div class="viewcode-block" id="PVLiveException"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLiveException">[docs]</a><span class="k">class</span> <span class="nc">PVLiveException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="PVLiveException">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLiveException">[docs]</a>
+<span class="k">class</span> <span class="nc">PVLiveException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An Exception specific to the PVLive class.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -108,7 +112,10 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span></div>
 
-<div class="viewcode-block" id="PVLive"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive">[docs]</a><span class="k">class</span> <span class="nc">PVLive</span><span class="p">:</span>
+
+<div class="viewcode-block" id="PVLive">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive">[docs]</a>
+<span class="k">class</span> <span class="nc">PVLive</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface with the PV_Live web API.</span>
 
@@ -121,11 +128,13 @@
 <span class="sd">        Optionally specify a Dict of proxies for http and https requests in the format:</span>
 <span class="sd">        {&quot;http&quot;: &quot;&lt;address&gt;&quot;, &quot;https&quot;: &quot;&lt;address&gt;&quot;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">proxies</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://api0.solar.sheffield.ac.uk/pvlive/api/v4/&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">proxies</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ssl_verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://api.solar.sheffield.ac.uk/pvlive/api/v4&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_range</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;national&quot;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">),</span> <span class="s2">&quot;regional&quot;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssl_verify</span> <span class="o">=</span> <span class="n">ssl_verify</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="mi">30</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gsp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_gsp_list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pes_list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gsp_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsp_list</span><span class="o">.</span><span class="n">gsp_id</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
@@ -143,7 +152,9 @@
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="PVLive.latest"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.latest">[docs]</a>    <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PVLive.latest">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.latest">[docs]</a>
+    <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                <span class="n">extra_fields</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -195,7 +206,10 @@
             <span class="k">return</span> <span class="n">data</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="PVLive.at_time"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.at_time">[docs]</a>    <span class="k">def</span> <span class="nf">at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+
+<div class="viewcode-block" id="PVLive.at_time">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.at_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
                 <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                 <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -242,7 +256,10 @@
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="PVLive.between"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.between">[docs]</a>    <span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+
+<div class="viewcode-block" id="PVLive.between">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.between">[docs]</a>
+    <span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
                 <span class="n">end</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
                 <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
@@ -289,7 +306,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_between</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">extra_fields</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PVLive.day_peak"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_peak">[docs]</a>    <span class="k">def</span> <span class="nf">day_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+
+<div class="viewcode-block" id="PVLive.day_peak">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_peak">[docs]</a>
+    <span class="k">def</span> <span class="nf">day_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
                  <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                  <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -347,7 +367,10 @@
             <span class="k">return</span> <span class="n">maxdata</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="PVLive.day_energy"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_energy">[docs]</a>    <span class="k">def</span> <span class="nf">day_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+<div class="viewcode-block" id="PVLive.day_energy">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">day_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the cumulative PV generation for a given day from the API.</span>
 
@@ -378,6 +401,7 @@
             <span class="n">pv_energy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="n">gen_index</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">gen_index</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.5</span>
             <span class="k">return</span> <span class="n">pv_energy</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
 
     <span class="k">def</span> <span class="nf">_between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">extra_fields</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
                  <span class="n">dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -438,7 +462,7 @@
 
     <span class="k">def</span> <span class="nf">_build_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct the appropriate URL for a given set of parameters.&quot;&quot;&quot;</span>
-        <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}{</span><span class="n">entity_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">entity_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">base_url</span> <span class="o">+</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">params</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">url</span>
 
@@ -450,7 +474,8 @@
         <span class="k">while</span> <span class="ow">not</span> <span class="n">success</span> <span class="ow">and</span> <span class="n">try_counter</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">retries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">try_counter</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
+                <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl_verify</span><span class="p">,</span>
+                                    <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
                 <span class="n">page</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
                 <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -493,7 +518,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The period parameter must be one of: &quot;</span>
                              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">periods</span><span class="p">))</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="parse_options"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.parse_options">[docs]</a><span class="k">def</span> <span class="nf">parse_options</span><span class="p">():</span>
+
+<div class="viewcode-block" id="parse_options">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.parse_options">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_options</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse command line options.&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;This is a command line interface (CLI) for the &quot;</span>
                                                   <span class="s2">&quot;PV_Live API module&quot;</span><span class="p">),</span>
@@ -568,7 +596,10 @@
         <span class="k">return</span> <span class="n">options</span>
     <span class="k">return</span> <span class="n">handle_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load CLI options and access the API accordingly.&quot;&quot;&quot;</span>
     <span class="n">options</span> <span class="o">=</span> <span class="n">parse_options</span><span class="p">()</span>
     <span class="n">pvl</span> <span class="o">=</span> <span class="n">PVLive</span><span class="p">(</span><span class="n">proxies</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
@@ -586,6 +617,7 @@
         <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
