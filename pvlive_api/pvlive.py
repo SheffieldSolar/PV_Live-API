@@ -11,7 +11,7 @@ import os
 import json
 from datetime import datetime, timedelta, date, time
 from time import sleep
-from typing import List, Union, Tuple, Dict, Optional
+from typing import List, Union, Tuple, Dict, Optional, Literal
 import inspect
 import argparse
 import re
@@ -20,6 +20,7 @@ import pytz
 import requests
 from numpy import nan, int64
 import pandas as pd
+from bs4 import BeautifulSoup
 
 class PVLiveException(Exception):
     """An Exception specific to the PVLive class."""
@@ -39,15 +40,16 @@ class PVLive:
 
     Parameters
     ----------
-    `retries` : int
+    retries : int
         Optionally specify the number of retries to use should the API respond with anything
         other than status code 200. Exponential back-off applies inbetween retries.
-    `proxies` : Optional[Dict]
+    proxies : Optional[Dict]
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
     """
     def __init__(self, retries: int = 3, proxies: Optional[Dict] = None, ssl_verify: bool = True):
-        self.base_url = "https://api.solar.sheffield.ac.uk/pvlive/api/v4"
+        self.domain_url = "https://api.solar.sheffield.ac.uk"
+        self.base_url = f"{self.domain_url}/pvlive/api/v4"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries
         self.proxies = proxies
@@ -57,6 +59,7 @@ class PVLive:
         self.pes_list = self._get_pes_list()
         self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
         self.pes_ids = self.pes_list.pes_id.dropna().astype(int64).unique()
+        self.deployment_releases = None
 
     def _get_gsp_list(self):
         """Fetch the GSP list from the API and convert to Pandas DataFrame."""
@@ -70,8 +73,96 @@ class PVLive:
         response = self._fetch_url(url)
         return pd.DataFrame(response["data"], columns=response["meta"])
 
+    def _get_deployment_releases(self):
+        """Get a list of deployment releases as datestamps (YYYYMMDD)."""
+        if self.deployment_releases is None:
+            url = f"{self.domain_url}/capacity/"
+            response = self._fetch_url(url, parse_json=False)
+            soup = BeautifulSoup(response.content, "html.parser")
+            releases = [r["href"].strip("/") for r in soup.find_all("a", href=True)
+                        if re.match(r"[0-9]{8}/", r["href"])]
+            self.deployment_releases = sorted(releases, reverse=True)
+        return self.deployment_releases
+
+    def _get_deployment_filenames(self, release):
+        """Get a list of filenames for a given release."""
+        url = f"{self.domain_url}/capacity/{release}/"
+        response = self._fetch_url(url, parse_json=False)
+        soup = BeautifulSoup(response.content, "html.parser")
+        filenames = [r["href"] for r in soup.find_all("a", href=True)
+                     if re.match(r".+\.csv.gz", r["href"])]
+        return filenames
+
+    def _validate_deployment_inputs(self, region, include_history, by_system_size, release):
+        """Validate input parameters to `deployment()`."""
+        releases = self._get_deployment_releases()
+        if not isinstance(region, str):
+            raise TypeError("`region` must be a string.")
+        supported_regions = ["gsp", "llsoa"]
+        if region not in supported_regions:
+            raise ValueError(f"The region must be one of {supported_regions}")
+        if not isinstance(include_history, bool):
+            raise TypeError("`include_history` must be True or False.")
+        if not isinstance(by_system_size, bool):
+            raise TypeError("`by_system_size` must be True or False.")
+        if by_system_size and region != "gsp":
+            raise ValueError(f"`by_system_size` can only be True if `region`='gsp'")
+        if by_system_size and not include_history:
+            raise ValueError(f"`by_system_size` can only be True if `include_history`=True")
+        if not isinstance(release, (str, int)):
+            raise TypeError("`release` must be str or int.")
+        if isinstance(release, str) and release not in releases:
+            raise ValueError(f"The requested release ({release}) was not found on the API")
+        if isinstance(release, int) and release not in range(len(releases)):
+            raise ValueError("The requested release index ({release}) was not found on the API, "
+                             f"release index must be between 0 and {len(releases)-1}")
+
+    def deployment(self,
+                   region: Literal["gsp", "llsoa"] = "gsp",
+                   include_history: bool = False,
+                   by_system_size: bool = False,
+                   release: Union[str, int] = 0) -> pd.DataFrame:
+        """
+        Download deployment data from the `/capacity` endpoint.
+
+        Parameters
+        ----------
+        region : str
+            The aggregation region for the deployment data, either 'gsp' (default) or 'llsoa'.
+        include_history : bool
+            Set to True to include historical deployment data. Defaults to False.
+        by_system_size : bool
+            If `region` == "gsp", set to True to also include the breakdown by system size.
+        release : Union[str, int]
+            The datestamp (YYYYMMDD) of the capacity update you wish to download. Pass a string
+            (e.g. "20231116") to get a specific release, or pass an int to get the latest
+            (release=0), next-latest (release==1) etc. Defaults to 0.
+
+        Returns
+        -------
+        Pandas DataFrame
+            Contains the columns pes_id, datetime_gmt and generation_mw, plus any extra_fields in
+            the order specified.
+        """
+        self._validate_deployment_inputs(region, include_history, by_system_size, release)
+        releases = self._get_deployment_releases()
+        release = releases[release] if isinstance(release, int) else release
+        filenames = self._get_deployment_filenames(release)
+        region_ = "20220314_GSP" if region == "gsp" else region
+        history_ = "_and_month" if include_history else ""
+        system_size_ = "_and_system_size" if by_system_size else ""
+        filename_ending = f"_capacity_by_{region_}{history_}{system_size_}.csv.gz"
+        filename = [f for f in filenames if f.endswith(filename_ending)][0]
+        url = f"{self.domain_url}/capacity/{release}/{filename}"
+        kwargs = dict(parse_dates=["install_month"]) if include_history else {}
+        deployment_data = pd.read_csv(url, **kwargs)
+        deployment_data.insert(0, "release", release)
+        deployment_data.rename(columns={"dc_capacity_MWp": "dc_capacity_mwp"}, inplace=True)
+        deployment_data.system_count = deployment_data.system_count.astype("Int64")
+        return deployment_data
+
     def latest(self,
-               entity_type: str = "gsp",
+               entity_type: Literal["gsp", "pes"] = "gsp",
                entity_id: int = 0,
                extra_fields: str = "",
                period: int = 30,
@@ -81,15 +172,15 @@ class PVLive:
 
         Parameters
         ----------
-        `entity_type` : string
+        entity_type : string
             The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
-        `entity_id` : int
+        entity_id : int
             The numerical ID of the entity of interest. Defaults to 0.
-        `extra_fields` : string
+        extra_fields : string
             Comma-separated string listing any extra fields.
-        `period` : int
+        period : int
             Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
-        `dataframe` : boolean
+        dataframe : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
         Returns
@@ -124,7 +215,7 @@ class PVLive:
 
     def at_time(self,
                 dt: datetime,
-                entity_type: str = "gsp",
+                entity_type: Literal["gsp", "pes"] = "gsp",
                 entity_id: int = 0,
                 extra_fields: str = "",
                 period: int = 30,
@@ -134,18 +225,18 @@ class PVLive:
 
         Parameters
         ----------
-        `dt` : datetime
+        dt : datetime
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *dt* falls, since Sheffield Solar use end of interval as convention.
-        `entity_type` : string
+        entity_type : string
             The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
-        `entity_id` : int
+        entity_id : int
             The numerical ID of the entity of interest. Defaults to 0.
-        `extra_fields` : string
+        extra_fields : string
             Comma-separated string listing any extra fields.
-        `period` : int
+        period : int
             Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
-        `dataframe` : boolean
+        dataframe : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
         Returns
@@ -172,7 +263,7 @@ class PVLive:
     def between(self,
                 start: datetime,
                 end: datetime,
-                entity_type: str = "gsp",
+                entity_type: Literal["gsp", "pes"] = "gsp",
                 entity_id: int = 0,
                 extra_fields: str = "",
                 period: int = 30,
@@ -182,21 +273,21 @@ class PVLive:
 
         Parameters
         ----------
-        `start` : datetime
+        start : datetime
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *start* falls, since Sheffield Solar use end of interval as convention.
-        `end` : datetime
+        end : datetime
             A timezone-aware datetime object. Will be corrected to the END of the half hour in which
             *end* falls, since Sheffield Solar use end of interval as convention.
-        `entity_type` : string
+        entity_type : string
             The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
-        `entity_id` : int
+        entity_id : int
             The numerical ID of the entity of interest. Defaults to 0.
-        `extra_fields` : string
+        extra_fields : string
             Comma-separated string listing any extra fields.
-        `period` : int
+        period : int
             Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
-        `dataframe` : boolean
+        dataframe : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
         Returns
@@ -218,7 +309,7 @@ class PVLive:
 
     def day_peak(self,
                  d: date,
-                 entity_type: str = "gsp",
+                 entity_type: Literal["gsp", "pes"] = "gsp",
                  entity_id: int = 0,
                  extra_fields: str = "",
                  period: int = 30,
@@ -228,17 +319,17 @@ class PVLive:
 
         Parameters
         ----------
-        `d` : date
+        d : date
             The day of interest as a date object.
-        `entity_type` : string
+        entity_type : string
             The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
-        `entity_id` : int
+        entity_id : int
             The numerical ID of the entity of interest. Defaults to 0.
-        `extra_fields` : string
+        extra_fields : string
             Comma-separated string listing any extra fields.
-        `period` : int
+        period : int
             Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.
-        `dataframe` : boolean
+        dataframe : boolean
             Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.
 
         Returns
@@ -274,17 +365,17 @@ class PVLive:
             return maxdata
         return None
 
-    def day_energy(self, d: date, entity_type: str = "gsp", entity_id: int = 0) -> float:
+    def day_energy(self, d: date, entity_type: Literal["gsp", "pes"] = "gsp", entity_id: int = 0) -> float:
         """
         Get the cumulative PV generation for a given day from the API.
 
         Parameters
         ----------
-        `d` : date
+        d : date
             The day of interest as a date object.
-        `entity_type` : string
+        entity_type : string
             The aggregation entity type of interest, either "pes" or "gsp". Defaults to "gsp".
-        `entity_id` : int
+        entity_id : int
             The numerical ID of the entity of interest. Defaults to 0.
 
         Returns
@@ -369,7 +460,7 @@ class PVLive:
         url = base_url + "?" + "&".join(["{}={}".format(k, params[k]) for k in params])
         return url
 
-    def _fetch_url(self, url):
+    def _fetch_url(self, url, parse_json=True):
         """Fetch the URL with GET request."""
         success = False
         try_counter = 0
@@ -391,7 +482,10 @@ class PVLive:
         if not success:
             raise PVLiveException("Error communicating with the PV_Live API.")
         try:
-            return json.loads(page.text)
+            if parse_json:
+                return json.loads(page.text)
+            else:
+                return page
         except Exception as e:
             raise PVLiveException("Error communicating with the PV_Live API.") from e
 
