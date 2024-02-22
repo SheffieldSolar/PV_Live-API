@@ -141,8 +141,8 @@ class PVLive:
         Returns
         -------
         Pandas DataFrame
-            Contains the columns pes_id, datetime_gmt and generation_mw, plus any extra_fields in
-            the order specified.
+            Columns vary depending on the input parameters, but shoudl include at least release,
+            GSPs/llsoa and dc_capacity_mwp.
         """
         self._validate_deployment_inputs(region, include_history, by_system_size, release)
         releases = self._get_deployment_releases()
