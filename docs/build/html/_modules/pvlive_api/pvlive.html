@@ -1,22 +1,20 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../">
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pvlive_api.pvlive &mdash; PV_Live API 1.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-
-  
+  <title>pvlive_api.pvlive &mdash; PV_Live API 1.2.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -34,7 +32,7 @@
             PV_Live API
           </a>
               <div class="version">
-                1.1.0
+                1.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -88,7 +86,7 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -97,10 +95,9 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span><span class="p">,</span> <span class="n">int64</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
 
-<div class="viewcode-block" id="PVLiveException">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLiveException">[docs]</a>
-<span class="k">class</span> <span class="nc">PVLiveException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="PVLiveException"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLiveException">[docs]</a><span class="k">class</span> <span class="nc">PVLiveException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An Exception specific to the PVLive class.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -112,24 +109,22 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span></div>
 
-
-<div class="viewcode-block" id="PVLive">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive">[docs]</a>
-<span class="k">class</span> <span class="nc">PVLive</span><span class="p">:</span>
+<div class="viewcode-block" id="PVLive"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive">[docs]</a><span class="k">class</span> <span class="nc">PVLive</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface with the PV_Live web API.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    `retries` : int</span>
+<span class="sd">    retries : int</span>
 <span class="sd">        Optionally specify the number of retries to use should the API respond with anything</span>
 <span class="sd">        other than status code 200. Exponential back-off applies inbetween retries.</span>
-<span class="sd">    `proxies` : Optional[Dict]</span>
+<span class="sd">    proxies : Optional[Dict]</span>
 <span class="sd">        Optionally specify a Dict of proxies for http and https requests in the format:</span>
 <span class="sd">        {&quot;http&quot;: &quot;&lt;address&gt;&quot;, &quot;https&quot;: &quot;&lt;address&gt;&quot;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">proxies</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ssl_verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://api.solar.sheffield.ac.uk/pvlive/api/v4&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain_url</span> <span class="o">=</span> <span class="s2">&quot;https://api.solar.sheffield.ac.uk&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_url</span><span class="si">}</span><span class="s2">/pvlive/api/v4&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_range</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;national&quot;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">),</span> <span class="s2">&quot;regional&quot;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
@@ -139,6 +134,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pes_list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gsp_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsp_list</span><span class="o">.</span><span class="n">gsp_id</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pes_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pes_list</span><span class="o">.</span><span class="n">pes_id</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deployment_releases</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_get_gsp_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the GSP list from the API and convert to Pandas DataFrame.&quot;&quot;&quot;</span>
@@ -152,10 +148,96 @@
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="PVLive.latest">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.latest">[docs]</a>
-    <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-               <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_get_deployment_releases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of deployment releases as datestamps (YYYYMMDD).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deployment_releases</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_url</span><span class="si">}</span><span class="s2">/capacity/&quot;</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">parse_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s2">&quot;html.parser&quot;</span><span class="p">)</span>
+            <span class="n">releases</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[0-9]</span><span class="si">{8}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">])]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deployment_releases</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">releases</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deployment_releases</span>
+
+    <span class="k">def</span> <span class="nf">_get_deployment_filenames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">release</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of filenames for a given release.&quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_url</span><span class="si">}</span><span class="s2">/capacity/</span><span class="si">{</span><span class="n">release</span><span class="si">}</span><span class="s2">/&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">parse_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s2">&quot;html.parser&quot;</span><span class="p">)</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;.+\.csv.gz&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">])]</span>
+        <span class="k">return</span> <span class="n">filenames</span>
+
+    <span class="k">def</span> <span class="nf">_validate_deployment_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">include_history</span><span class="p">,</span> <span class="n">by_system_size</span><span class="p">,</span> <span class="n">release</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate input parameters to `deployment()`.&quot;&quot;&quot;</span>
+        <span class="n">releases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_deployment_releases</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`region` must be a string.&quot;</span><span class="p">)</span>
+        <span class="n">supported_regions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;llsoa&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">region</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_regions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The region must be one of </span><span class="si">{</span><span class="n">supported_regions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_history</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`include_history` must be True or False.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">by_system_size</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`by_system_size` must be True or False.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">by_system_size</span> <span class="ow">and</span> <span class="n">region</span> <span class="o">!=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`by_system_size` can only be True if `region`=&#39;gsp&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">by_system_size</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">include_history</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`by_system_size` can only be True if `include_history`=True&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">release</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`release` must be str or int.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">release</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">release</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">releases</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The requested release (</span><span class="si">{</span><span class="n">release</span><span class="si">}</span><span class="s2">) was not found on the API&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">release</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">release</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">releases</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The requested release index (</span><span class="si">{release}</span><span class="s2">) was not found on the API, &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;release index must be between 0 and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">releases</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PVLive.deployment"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.deployment">[docs]</a>    <span class="k">def</span> <span class="nf">deployment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                   <span class="n">region</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;llsoa&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
+                   <span class="n">include_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                   <span class="n">by_system_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                   <span class="n">release</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Download deployment data from the `/capacity` endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        region : str</span>
+<span class="sd">            The aggregation region for the deployment data, either &#39;gsp&#39; (default) or &#39;llsoa&#39;.</span>
+<span class="sd">        include_history : bool</span>
+<span class="sd">            Set to True to include historical deployment data. Defaults to False.</span>
+<span class="sd">        by_system_size : bool</span>
+<span class="sd">            If `region` == &quot;gsp&quot;, set to True to also include the breakdown by system size.</span>
+<span class="sd">        release : Union[str, int]</span>
+<span class="sd">            The datestamp (YYYYMMDD) of the capacity update you wish to download. Pass a string</span>
+<span class="sd">            (e.g. &quot;20231116&quot;) to get a specific release, or pass an int to get the latest</span>
+<span class="sd">            (release=0), next-latest (release==1) etc. Defaults to 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Pandas DataFrame</span>
+<span class="sd">            Columns vary depending on the input parameters, but shoudl include at least release,</span>
+<span class="sd">            GSPs/llsoa and dc_capacity_mwp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_deployment_inputs</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">include_history</span><span class="p">,</span> <span class="n">by_system_size</span><span class="p">,</span> <span class="n">release</span><span class="p">)</span>
+        <span class="n">releases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_deployment_releases</span><span class="p">()</span>
+        <span class="n">release</span> <span class="o">=</span> <span class="n">releases</span><span class="p">[</span><span class="n">release</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">release</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">release</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_deployment_filenames</span><span class="p">(</span><span class="n">release</span><span class="p">)</span>
+        <span class="n">region_</span> <span class="o">=</span> <span class="s2">&quot;20220314_GSP&quot;</span> <span class="k">if</span> <span class="n">region</span> <span class="o">==</span> <span class="s2">&quot;gsp&quot;</span> <span class="k">else</span> <span class="n">region</span>
+        <span class="n">history_</span> <span class="o">=</span> <span class="s2">&quot;_and_month&quot;</span> <span class="k">if</span> <span class="n">include_history</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">system_size_</span> <span class="o">=</span> <span class="s2">&quot;_and_system_size&quot;</span> <span class="k">if</span> <span class="n">by_system_size</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">filename_ending</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;_capacity_by_</span><span class="si">{</span><span class="n">region_</span><span class="si">}{</span><span class="n">history_</span><span class="si">}{</span><span class="n">system_size_</span><span class="si">}</span><span class="s2">.csv.gz&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">filename_ending</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_url</span><span class="si">}</span><span class="s2">/capacity/</span><span class="si">{</span><span class="n">release</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;install_month&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">include_history</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">deployment_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">deployment_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">,</span> <span class="n">release</span><span class="p">)</span>
+        <span class="n">deployment_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dc_capacity_MWp&quot;</span><span class="p">:</span> <span class="s2">&quot;dc_capacity_mwp&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">deployment_data</span><span class="o">.</span><span class="n">system_count</span> <span class="o">=</span> <span class="n">deployment_data</span><span class="o">.</span><span class="n">system_count</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;Int64&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deployment_data</span></div>
+
+<div class="viewcode-block" id="PVLive.latest"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.latest">[docs]</a>    <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">entity_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;pes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                <span class="n">extra_fields</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -165,15 +247,15 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        `entity_type` : string</span>
+<span class="sd">        entity_type : string</span>
 <span class="sd">            The aggregation entity type of interest, either &quot;pes&quot; or &quot;gsp&quot;. Defaults to &quot;gsp&quot;.</span>
-<span class="sd">        `entity_id` : int</span>
+<span class="sd">        entity_id : int</span>
 <span class="sd">            The numerical ID of the entity of interest. Defaults to 0.</span>
-<span class="sd">        `extra_fields` : string</span>
+<span class="sd">        extra_fields : string</span>
 <span class="sd">            Comma-separated string listing any extra fields.</span>
-<span class="sd">        `period` : int</span>
+<span class="sd">        period : int</span>
 <span class="sd">            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.</span>
-<span class="sd">        `dataframe` : boolean</span>
+<span class="sd">        dataframe : boolean</span>
 <span class="sd">            Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.</span>
 
 <span class="sd">        Returns</span>
@@ -206,12 +288,9 @@
             <span class="k">return</span> <span class="n">data</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-
-<div class="viewcode-block" id="PVLive.at_time">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.at_time">[docs]</a>
-    <span class="k">def</span> <span class="nf">at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PVLive.at_time"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.at_time">[docs]</a>    <span class="k">def</span> <span class="nf">at_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
-                <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
+                <span class="n">entity_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;pes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                 <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">extra_fields</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -221,18 +300,18 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        `dt` : datetime</span>
+<span class="sd">        dt : datetime</span>
 <span class="sd">            A timezone-aware datetime object. Will be corrected to the END of the half hour in which</span>
 <span class="sd">            *dt* falls, since Sheffield Solar use end of interval as convention.</span>
-<span class="sd">        `entity_type` : string</span>
+<span class="sd">        entity_type : string</span>
 <span class="sd">            The aggregation entity type of interest, either &quot;pes&quot; or &quot;gsp&quot;. Defaults to &quot;gsp&quot;.</span>
-<span class="sd">        `entity_id` : int</span>
+<span class="sd">        entity_id : int</span>
 <span class="sd">            The numerical ID of the entity of interest. Defaults to 0.</span>
-<span class="sd">        `extra_fields` : string</span>
+<span class="sd">        extra_fields : string</span>
 <span class="sd">            Comma-separated string listing any extra fields.</span>
-<span class="sd">        `period` : int</span>
+<span class="sd">        period : int</span>
 <span class="sd">            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.</span>
-<span class="sd">        `dataframe` : boolean</span>
+<span class="sd">        dataframe : boolean</span>
 <span class="sd">            Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.</span>
 
 <span class="sd">        Returns</span>
@@ -256,13 +335,10 @@
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-
-<div class="viewcode-block" id="PVLive.between">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.between">[docs]</a>
-    <span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PVLive.between"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.between">[docs]</a>    <span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
                 <span class="n">end</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
-                <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
+                <span class="n">entity_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;pes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                 <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">extra_fields</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -272,21 +348,21 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        `start` : datetime</span>
+<span class="sd">        start : datetime</span>
 <span class="sd">            A timezone-aware datetime object. Will be corrected to the END of the half hour in which</span>
 <span class="sd">            *start* falls, since Sheffield Solar use end of interval as convention.</span>
-<span class="sd">        `end` : datetime</span>
+<span class="sd">        end : datetime</span>
 <span class="sd">            A timezone-aware datetime object. Will be corrected to the END of the half hour in which</span>
 <span class="sd">            *end* falls, since Sheffield Solar use end of interval as convention.</span>
-<span class="sd">        `entity_type` : string</span>
+<span class="sd">        entity_type : string</span>
 <span class="sd">            The aggregation entity type of interest, either &quot;pes&quot; or &quot;gsp&quot;. Defaults to &quot;gsp&quot;.</span>
-<span class="sd">        `entity_id` : int</span>
+<span class="sd">        entity_id : int</span>
 <span class="sd">            The numerical ID of the entity of interest. Defaults to 0.</span>
-<span class="sd">        `extra_fields` : string</span>
+<span class="sd">        extra_fields : string</span>
 <span class="sd">            Comma-separated string listing any extra fields.</span>
-<span class="sd">        `period` : int</span>
+<span class="sd">        period : int</span>
 <span class="sd">            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.</span>
-<span class="sd">        `dataframe` : boolean</span>
+<span class="sd">        dataframe : boolean</span>
 <span class="sd">            Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.</span>
 
 <span class="sd">        Returns</span>
@@ -306,12 +382,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_between</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">extra_fields</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="PVLive.day_peak">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_peak">[docs]</a>
-    <span class="k">def</span> <span class="nf">day_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PVLive.day_peak"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_peak">[docs]</a>    <span class="k">def</span> <span class="nf">day_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
-                 <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
+                 <span class="n">entity_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;pes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span>
                  <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">extra_fields</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                  <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -321,17 +394,17 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        `d` : date</span>
+<span class="sd">        d : date</span>
 <span class="sd">            The day of interest as a date object.</span>
-<span class="sd">        `entity_type` : string</span>
+<span class="sd">        entity_type : string</span>
 <span class="sd">            The aggregation entity type of interest, either &quot;pes&quot; or &quot;gsp&quot;. Defaults to &quot;gsp&quot;.</span>
-<span class="sd">        `entity_id` : int</span>
+<span class="sd">        entity_id : int</span>
 <span class="sd">            The numerical ID of the entity of interest. Defaults to 0.</span>
-<span class="sd">        `extra_fields` : string</span>
+<span class="sd">        extra_fields : string</span>
 <span class="sd">            Comma-separated string listing any extra fields.</span>
-<span class="sd">        `period` : int</span>
+<span class="sd">        period : int</span>
 <span class="sd">            Time-resolution to retrieve, either 30 or 5 (minutely). Default is 30.</span>
-<span class="sd">        `dataframe` : boolean</span>
+<span class="sd">        dataframe : boolean</span>
 <span class="sd">            Set to True to return data as a Python DataFrame. Default is False, i.e. return a tuple.</span>
 
 <span class="sd">        Returns</span>
@@ -367,20 +440,17 @@
             <span class="k">return</span> <span class="n">maxdata</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-
-<div class="viewcode-block" id="PVLive.day_energy">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_energy">[docs]</a>
-    <span class="k">def</span> <span class="nf">day_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="PVLive.day_energy"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.PVLive.day_energy">[docs]</a>    <span class="k">def</span> <span class="nf">day_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="s2">&quot;pes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the cumulative PV generation for a given day from the API.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        `d` : date</span>
+<span class="sd">        d : date</span>
 <span class="sd">            The day of interest as a date object.</span>
-<span class="sd">        `entity_type` : string</span>
+<span class="sd">        entity_type : string</span>
 <span class="sd">            The aggregation entity type of interest, either &quot;pes&quot; or &quot;gsp&quot;. Defaults to &quot;gsp&quot;.</span>
-<span class="sd">        `entity_id` : int</span>
+<span class="sd">        entity_id : int</span>
 <span class="sd">            The numerical ID of the entity of interest. Defaults to 0.</span>
 
 <span class="sd">        Returns</span>
@@ -401,7 +471,6 @@
             <span class="n">pv_energy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="n">gen_index</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">gen_index</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.5</span>
             <span class="k">return</span> <span class="n">pv_energy</span>
         <span class="k">return</span> <span class="kc">None</span></div>
-
 
     <span class="k">def</span> <span class="nf">_between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;gsp&quot;</span><span class="p">,</span> <span class="n">entity_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">extra_fields</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
                  <span class="n">dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -466,7 +535,7 @@
         <span class="n">url</span> <span class="o">=</span> <span class="n">base_url</span> <span class="o">+</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">params</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">url</span>
 
-    <span class="k">def</span> <span class="nf">_fetch_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_fetch_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">parse_json</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the URL with GET request.&quot;&quot;&quot;</span>
         <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">try_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -488,7 +557,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PVLiveException</span><span class="p">(</span><span class="s2">&quot;Error communicating with the PV_Live API.&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parse_json</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">page</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PVLiveException</span><span class="p">(</span><span class="s2">&quot;Error communicating with the PV_Live API.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
@@ -518,10 +590,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The period parameter must be one of: &quot;</span>
                              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">periods</span><span class="p">))</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="parse_options">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.parse_options">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_options</span><span class="p">():</span>
+<div class="viewcode-block" id="parse_options"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.parse_options">[docs]</a><span class="k">def</span> <span class="nf">parse_options</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse command line options.&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;This is a command line interface (CLI) for the &quot;</span>
                                                   <span class="s2">&quot;PV_Live API module&quot;</span><span class="p">),</span>
@@ -596,10 +665,7 @@
         <span class="k">return</span> <span class="n">options</span>
     <span class="k">return</span> <span class="n">handle_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="main">
-<a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../modules.html#pvlive_api.pvlive.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load CLI options and access the API accordingly.&quot;&quot;&quot;</span>
     <span class="n">options</span> <span class="o">=</span> <span class="n">parse_options</span><span class="p">()</span>
     <span class="n">pvl</span> <span class="o">=</span> <span class="n">PVLive</span><span class="p">(</span><span class="n">proxies</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
@@ -617,7 +683,6 @@
         <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
-
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>

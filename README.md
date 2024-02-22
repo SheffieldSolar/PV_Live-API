@@ -43,6 +43,12 @@ These methods include the following optional parameters:
 |`period`|Set the desired temporal resolution (in minutes) for PV outturn estimates. Options are 30 (default) or 5.|
 |`dataframe`|Set `dataframe=True` and the results will be returned as a Pandas DataFrame object which is generally much easier to work with. The columns of the DataFrame will be _pes_id_ or _gsp_id_, _datetime_gmt_, _generation_mw_, plus any extra fields specified.|
 
+There is also a method for extracting PV deployment (a.k.a capacity) data:
+|Method|Description|Docs Link|
+|------|-----------|---------|
+|`PVLive.deployment(region="gsp", include_history=False, by_system_size=False, release=0)`|Download PV deployment datasets from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.deployment)|
+
+
 ## Code Examples
 
 See [pvlive_api_demo.py](https://github.com/SheffieldSolar/PV_Live-API/blob/master/pvlive_api_demo.py) for more example usage.
@@ -146,7 +152,7 @@ There is also a Docker Image hosted on Docker Hub which can be used to download 
 Sheffield Solar will endeavour to update this library in sync with the [PV_Live API](https://www.solar.sheffield.ac.uk/pvlive/api/ "PV_Live API webpage") and ensure the latest version of this library always supports the latest version of the PV_Live API, but cannot guarantee this. To make sure you are forewarned of upcoming changes to the API, you should email [solar@sheffield.ac.uk](mailto:solar@sheffield.ac.uk?subject=PV_Live%20API%20email%20updates "Email Sheffield Solar") and request to be added to the PV_Live user mailing list.
 
 To upgrade the code:
-* Run `pip install --upgrade git+https://github.com/SheffieldSolar/PV_Live-API`
+* Run `pip install --upgrade pvlive-api`
 
 ## Notes on PV_Live GB national update cycle
 
