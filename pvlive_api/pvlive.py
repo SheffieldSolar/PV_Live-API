@@ -15,6 +15,7 @@ from typing import List, Union, Tuple, Dict, Optional, Literal
 import inspect
 import argparse
 import re
+from io import BytesIO
 
 import pytz
 import requests
@@ -155,7 +156,9 @@ class PVLive:
         filename = [f for f in filenames if f.endswith(filename_ending)][0]
         url = f"{self.domain_url}/capacity/{release}/{filename}"
         kwargs = dict(parse_dates=["install_month"]) if include_history else {}
-        deployment_data = pd.read_csv(url, **kwargs)
+        response = self._fetch_url(url, parse_json=False)
+        mock_file = BytesIO(response.content)
+        deployment_data = pd.read_csv(mock_file, compression={"method": "gzip"}, **kwargs)
         deployment_data.insert(0, "release", release)
         deployment_data.rename(columns={"dc_capacity_MWp": "dc_capacity_mwp"}, inplace=True)
         deployment_data.system_count = deployment_data.system_count.astype("Int64")
