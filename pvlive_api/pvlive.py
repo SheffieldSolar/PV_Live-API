@@ -48,8 +48,27 @@ class PVLive:
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
     """
-    def __init__(self, retries: int = 3, proxies: Optional[Dict] = None, ssl_verify: bool = True):
-        self.domain_url = "https://api.solar.sheffield.ac.uk"
+    def __init__(
+        self,
+        retries: int = 3,
+        proxies: Optional[Dict] = None,
+        ssl_verify: bool = True,
+        domain_url: Literal[
+            "api0.solar.sheffield.ac.uk",
+            "api.solar.sheffield.ac.uk",
+            "api.pvlive.uk"
+        ] = "api.solar.sheffield.ac.uk"
+    ):
+        valid_domain_urls = [
+            "api0.solar.sheffield.ac.uk",
+            "api.solar.sheffield.ac.uk",
+            "api.pvlive.uk"
+        ]
+        if domain_url not in valid_domain_urls:
+            raise ValueError(
+                f"`domain_url` of '{domain_url}' is invalid, must be one of: {valid_domain_urls}"
+            )
+        self.domain_url = f"https://{domain_url}"
         self.base_url = f"{self.domain_url}/pvlive/api/v4"
         self.max_range = {"national": timedelta(days=365), "regional": timedelta(days=30)}
         self.retries = retries

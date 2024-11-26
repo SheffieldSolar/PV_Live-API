@@ -18,7 +18,14 @@ class PVLiveTestCase(unittest.TestCase):
         """
         Setup the instance of class.
         """
-        self.api = PVLive()
+        self.api = PVLive(
+            retries=3,
+            proxies=None,
+            ssl_verify=True,
+            # domain_url="api0.solar.sheffield.ac.uk",
+            domain_url="api.solar.sheffield.ac.uk",
+            # domain_url="api.pvlive.uk"
+        )
         self.expected_dtypes = {
             "pes_id": ptypes.is_integer_dtype,
             "gsp_id": ptypes.is_integer_dtype,
