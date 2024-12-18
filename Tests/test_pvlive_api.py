@@ -5,7 +5,7 @@ Written: 07/11/2020
 """
 
 import unittest
-from datetime import datetime, date
+from datetime import datetime, date, time
 import pytz
 
 import pandas.api.types as ptypes
@@ -18,7 +18,14 @@ class PVLiveTestCase(unittest.TestCase):
         """
         Setup the instance of class.
         """
-        self.api = PVLive()
+        self.api = PVLive(
+            retries=3,
+            proxies=None,
+            ssl_verify=True,
+            # domain_url="api0.solar.sheffield.ac.uk",
+            domain_url="api.solar.sheffield.ac.uk",
+            # domain_url="api.pvlive.uk"
+        )
         self.expected_dtypes = {
             "pes_id": ptypes.is_integer_dtype,
             "gsp_id": ptypes.is_integer_dtype,
@@ -118,20 +125,31 @@ class PVLiveTestCase(unittest.TestCase):
         data = self.api.latest(entity_type="pes", entity_id=0, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.latest(entity_type="pes", entity_id=0,
-                               extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                               dataframe=True)
+        data = self.api.latest(
+            entity_type="pes",
+            entity_id=0,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.latest(entity_type="pes", entity_id=0, period=5)
+        data = self.api.latest(
+            entity_type="pes",
+            entity_id=0,
+            period=5
+        )
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
         data = self.api.latest(entity_type="pes", entity_id=0, period=5, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.latest(entity_type="pes", entity_id=0,
-                               extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                               period=5, dataframe=True)
+        data = self.api.latest(
+            entity_type="pes",
+            entity_id=0,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            period=5,
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
         data = self.api.latest(entity_type="gsp", entity_id=103)
@@ -143,31 +161,50 @@ class PVLiveTestCase(unittest.TestCase):
 
     def test_day_peak(self):
         """Tests the day_peak function."""
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="pes", entity_id=0)
+        test_date = date(2024, 12, 17)
+        data = self.api.day_peak(d=test_date, entity_type="pes", entity_id=0)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="pes", entity_id=0, dataframe=True)
+        data = self.api.day_peak(d=test_date, entity_type="pes", entity_id=0, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1),
-                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                 entity_type="pes", entity_id=0, dataframe=True)
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="pes", entity_id=0, period=5)
+        data = self.api.day_peak(
+            d=test_date,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            entity_type="pes",
+            entity_id=0,
+            dataframe=True
+        )
+        data = self.api.day_peak(d=test_date, entity_type="pes", entity_id=0, period=5)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="pes", entity_id=0, period=5,
-                                 dataframe=True)
+        data = self.api.day_peak(
+            d=test_date,
+            entity_type="pes",
+            entity_id=0,
+            period=5,
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1),
-                                 extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                 entity_type="pes", entity_id=0, period=5, dataframe=True)
+        data = self.api.day_peak(
+            d=test_date,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            entity_type="pes",
+            entity_id=0,
+            period=5,
+            dataframe=True
+        )
         self.check_df_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="gsp", entity_id=54)
+        data = self.api.day_peak(d=test_date, entity_type="gsp", entity_id=54)
         self.check_gsp_tuple(data)
         self.check_gsp_tuple_dtypes(data)
-        data = self.api.day_peak(d=date(2023, 12, 1), entity_type="gsp", entity_id=54,
-                                 dataframe=True)
+        data = self.api.day_peak(
+            d=test_date,
+            entity_type="gsp",
+            entity_id=54,
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
 
@@ -178,61 +215,82 @@ class PVLiveTestCase(unittest.TestCase):
 
     def test_between(self):
         """Test the between function."""
-        data = self.api.between(start=datetime(2023, 12, 1, 12, 20, tzinfo=pytz.utc),
-                                end=datetime(2023, 12, 1, 14, 0, tzinfo=pytz.utc),
-                                entity_type="pes", entity_id=0)
+        test_date = date(2024, 12, 17)
+        get_test_time = lambda h, m: datetime.combine(test_date, time(h, m))\
+                                             .replace(tzinfo=pytz.UTC)
+        data = self.api.between(
+            start=get_test_time(12, 20),
+            end=get_test_time(14, 0),
+            entity_type="pes",
+            entity_id=0
+        )
         with self.subTest():
             assert isinstance(data, list)
-        data = self.api.between(start=datetime(2023, 12, 1, 12, 20, tzinfo=pytz.utc),
-                                end=datetime(2023, 12, 1, 14, 0, tzinfo=pytz.utc),
-                                entity_type="pes", entity_id=0, dataframe=True)
+        data = self.api.between(
+            start=get_test_time(12, 20),
+            end=get_test_time(14, 0),
+            entity_type="pes",
+            entity_id=0,
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.between(start=datetime(2023, 12, 1, tzinfo=pytz.utc),
-                                end=datetime(2023, 12, 1, 14, 00, tzinfo=pytz.utc),
-                                entity_type="pes", entity_id=0, period=5)
+        data = self.api.between(
+            start=get_test_time(0, 0),
+            end=get_test_time(14, 0),
+            entity_type="pes",
+            entity_id=0,
+            period=5
+        )
         with self.subTest():
             assert isinstance(data, list)
-        data = self.api.between(start=datetime(2023, 12, 1, 12, 20, tzinfo=pytz.utc),
-                                end=datetime(2023, 12, 1, 14, 00, tzinfo=pytz.utc),
-                                entity_type="pes", entity_id=0, period=5, dataframe=True)
+        data = self.api.between(
+            start=get_test_time(12, 20),
+            end=get_test_time(14, 0),
+            entity_type="pes",
+            entity_id=0,
+            period=5,
+            dataframe=True
+        )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
 
     def test_at_time(self):
         """Test the at_time function."""
-        data = self.api.at_time(dt=datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                            entity_id=0)
+        test_time = datetime(2024, 12, 18, 12, 35, tzinfo=pytz.utc)
+        data = self.api.at_time(dt=test_time, entity_type="pes", entity_id=0)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
-        data = self.api.at_time(datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                entity_id=0, dataframe=True)
+        data = self.api.at_time(test_time, entity_type="pes", entity_id=0, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.at_time(datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                entity_id=0,
-                                extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                dataframe=True)
+        data = self.api.at_time(
+            test_time,
+            entity_type="pes",
+            entity_id=0,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            dataframe=True
+        )
         self.check_df_dtypes(data)
-        data = self.api.at_time(dt=datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                            entity_id=0, period=5)
+        data = self.api.at_time(dt=test_time, entity_type="pes", entity_id=0, period=5)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
-        data = self.api.at_time(datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                entity_id=0, period=5, dataframe=True)
+        data = self.api.at_time(test_time, entity_type="pes", entity_id=0, period=5, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.at_time(datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="pes",
-                                entity_id=0,
-                                extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-                                period=5, dataframe=True)
+        data = self.api.at_time(
+            test_time,
+            entity_type="pes",
+            entity_id=0,
+            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
+            period=5,
+            dataframe=True
+        )
         self.check_df_dtypes(data)
-        data = self.api.at_time(dt=datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="gsp",
-                                entity_id=26)
+        data = self.api.at_time(dt=test_time, entity_type="gsp", entity_id=26)
         self.check_gsp_tuple(data)
         self.check_gsp_tuple_dtypes(data)
-        data = self.api.at_time(datetime(2023, 12, 1, 12, 35, tzinfo=pytz.utc), entity_type="gsp",
-                                         entity_id=26, dataframe=True)
+        data = self.api.at_time(test_time, entity_type="gsp", entity_id=26, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
 
