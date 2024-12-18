@@ -161,7 +161,7 @@ class PVLiveTestCase(unittest.TestCase):
 
     def test_day_peak(self):
         """Tests the day_peak function."""
-        test_date = date(2024, 5, 1)
+        test_date = date(2024, 12, 17)
         data = self.api.day_peak(d=test_date, entity_type="pes", entity_id=0)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
@@ -215,7 +215,7 @@ class PVLiveTestCase(unittest.TestCase):
 
     def test_between(self):
         """Test the between function."""
-        test_date = date(2024, 5, 1)
+        test_date = date(2024, 12, 17)
         get_test_time = lambda h, m: datetime.combine(test_date, time(h, m))\
                                              .replace(tzinfo=pytz.UTC)
         data = self.api.between(
@@ -257,7 +257,7 @@ class PVLiveTestCase(unittest.TestCase):
 
     def test_at_time(self):
         """Test the at_time function."""
-        test_time = datetime(2024, 5, 1, 12, 35, tzinfo=pytz.utc)
+        test_time = datetime(2024, 12, 18, 12, 35, tzinfo=pytz.utc)
         data = self.api.at_time(dt=test_time, entity_type="pes", entity_id=0)
         self.check_pes_tuple(data)
         self.check_pes_tuple_dtypes(data)
