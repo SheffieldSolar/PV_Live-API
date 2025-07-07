@@ -54,10 +54,10 @@ class PVLive:
         proxies: Optional[Dict] = None,
         ssl_verify: bool = True,
         domain_url: Literal[
-            "api0.solar.sheffield.ac.uk",
+            "api.pvlive.uk",
             "api.solar.sheffield.ac.uk",
-            "api.pvlive.uk"
-        ] = "api.solar.sheffield.ac.uk"
+            "api0.solar.sheffield.ac.uk",
+        ] = "api.pvlive.uk"
     ):
         valid_domain_urls = [
             "api0.solar.sheffield.ac.uk",
