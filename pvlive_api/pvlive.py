@@ -192,6 +192,7 @@ class PVLive:
         deployment_data.insert(0, "release", release)
         deployment_data.rename(columns={"dc_capacity_MWp": "dc_capacity_mwp"}, inplace=True)
         deployment_data.system_count = deployment_data.system_count.astype("Int64")
+        deployment_data.dropna(how="any", inplace=True)
         return deployment_data
 
     def latest(self,
