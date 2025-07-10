@@ -543,7 +543,7 @@ class PVLive:
         elif entity_type == "gsp":
             if entity_id not in self.gsp_ids:
                 raise PVLiveException(f"The gsp_id {entity_id} was not found.")
-        periods = [5, 30]
+        periods = [30]
         if period not in periods:
             raise ValueError("The period parameter must be one of: "
                              f"{', '.join(map(str, periods))}.")
