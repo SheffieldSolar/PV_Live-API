@@ -47,6 +47,12 @@ class PVLive:
     proxies : Optional[Dict]
         Optionally specify a Dict of proxies for http and https requests in the format:
         {"http": "<address>", "https": "<address>"}
+    ssl_verify : Bool
+        Set to False to disable SSL cert checks when querying the API. Useful if e.g. your company
+        network/VPN has issues propagating SSL certs. Defaults to True. Not recommended to set to
+        False!
+    domain_url : Literal["api.pvlive.uk", "api.solar.sheffield.ac.uk", "api0.solar.sheffield.ac.uk"]
+        Used to switch between the production PV_Live API on GCP and the test/FOF server on-prem.
     """
     def __init__(
         self,
