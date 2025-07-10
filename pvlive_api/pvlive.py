@@ -53,6 +53,8 @@ class PVLive:
         False!
     domain_url : Literal["api.pvlive.uk", "api.solar.sheffield.ac.uk", "api0.solar.sheffield.ac.uk"]
         Used to switch between the production PV_Live API on GCP and the test/FOF server on-prem.
+    gsp_boundaries_version : str
+        Some capacity datasets (by GSP) are encoded with the version of the GSP boundaries used.
     """
     def __init__(
         self,
@@ -63,7 +65,8 @@ class PVLive:
             "api.pvlive.uk",
             "api.solar.sheffield.ac.uk",
             "api0.solar.sheffield.ac.uk",
-        ] = "api.pvlive.uk"
+        ] = "api.pvlive.uk",
+        gsp_boundaries_version: str = "20250109",
     ):
         valid_domain_urls = [
             "api0.solar.sheffield.ac.uk",
@@ -87,6 +90,7 @@ class PVLive:
         self.pes_ids = self.pes_list.pes_id.dropna().astype(int64).unique()
         self.deployment_datasets = None
         self.deployment_releases = None
+        self.gsp_boundaries_version = gsp_boundaries_version
 
     def _get_gsp_list(self):
         """Fetch the GSP list from the API and convert to Pandas DataFrame."""
@@ -174,8 +178,8 @@ class PVLive:
         self._validate_deployment_inputs(region, include_history, by_system_size, release)
         deployment_datasets, releases = self._get_deployment_releases()
         release = releases[release] if isinstance(release, int) else release
-        region_ = "20220314_GSP" if region == "gsp" else region
         filenames = list(deployment_datasets[release].keys())
+        region_ = f"{self.gsp_boundaries_version}_GSP" if region == "gsp" else region
         history_ = "_and_month" if include_history else ""
         system_size_ = "_and_system_size" if by_system_size else ""
         filename_ending = f"_capacity_by_{region_}{history_}{system_size_}.csv.gz"
