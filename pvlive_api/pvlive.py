@@ -85,6 +85,7 @@ class PVLive:
         self.pes_list = self._get_pes_list()
         self.gsp_ids = self.gsp_list.gsp_id.dropna().astype(int64).unique()
         self.pes_ids = self.pes_list.pes_id.dropna().astype(int64).unique()
+        self.deployment_datasets = None
         self.deployment_releases = None
 
     def _get_gsp_list(self):
@@ -100,15 +101,15 @@ class PVLive:
         return pd.DataFrame(response["data"], columns=response["meta"])
 
     def _get_deployment_releases(self):
-        """Get a list of deployment releases as datestamps (YYYYMMDD)."""
-        if self.deployment_releases is None:
+        """
+        Get the available deployment releases as a list of datestamps (YYYYMMDD) alongside a dict of
+        files available in each release.
+        """
+        if self.deployment_datasets is None:
             url = f"{self.domain_url}/capacity/"
-            response = self._fetch_url(url, parse_json=False)
-            soup = BeautifulSoup(response.content, "html.parser")
-            releases = [r["href"].strip("/") for r in soup.find_all("a", href=True)
-                        if re.match(r"[0-9]{8}/", r["href"])]
-            self.deployment_releases = sorted(releases, reverse=True)
-        return self.deployment_releases
+            self.deployment_datasets = self._fetch_url(url, parse_json=True)
+            self.deployment_releases = sorted(list(self.deployment_datasets.keys()), reverse=True)
+        return self.deployment_datasets, self.deployment_releases
 
     def _get_deployment_filenames(self, release):
         """Get a list of filenames for a given release."""
@@ -121,7 +122,7 @@ class PVLive:
 
     def _validate_deployment_inputs(self, region, include_history, by_system_size, release):
         """Validate input parameters to `deployment()`."""
-        releases = self._get_deployment_releases()
+        deployment_datasets, releases = self._get_deployment_releases()
         if not isinstance(region, str):
             raise TypeError("`region` must be a string.")
         supported_regions = ["gsp", "llsoa"]
@@ -171,15 +172,15 @@ class PVLive:
             GSPs/llsoa and dc_capacity_mwp.
         """
         self._validate_deployment_inputs(region, include_history, by_system_size, release)
-        releases = self._get_deployment_releases()
+        deployment_datasets, releases = self._get_deployment_releases()
         release = releases[release] if isinstance(release, int) else release
-        filenames = self._get_deployment_filenames(release)
         region_ = "20220314_GSP" if region == "gsp" else region
+        filenames = list(deployment_datasets[release].keys())
         history_ = "_and_month" if include_history else ""
         system_size_ = "_and_system_size" if by_system_size else ""
         filename_ending = f"_capacity_by_{region_}{history_}{system_size_}.csv.gz"
         filename = [f for f in filenames if f.endswith(filename_ending)][0]
-        url = f"{self.domain_url}/capacity/{release}/{filename}"
+        url = deployment_datasets[release][filename]
         kwargs = dict(parse_dates=["install_month"]) if include_history else {}
         response = self._fetch_url(url, parse_json=False)
         mock_file = BytesIO(response.content)
