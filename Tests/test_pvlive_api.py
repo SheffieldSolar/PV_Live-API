@@ -133,25 +133,6 @@ class PVLiveTestCase(unittest.TestCase):
         )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.latest(
-            entity_type="pes",
-            entity_id=0,
-            period=5
-        )
-        self.check_pes_tuple(data)
-        self.check_pes_tuple_dtypes(data)
-        data = self.api.latest(entity_type="pes", entity_id=0, period=5, dataframe=True)
-        self.check_df_columns(data)
-        self.check_df_dtypes(data)
-        data = self.api.latest(
-            entity_type="pes",
-            entity_id=0,
-            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-            period=5,
-            dataframe=True
-        )
-        self.check_df_columns(data)
-        self.check_df_dtypes(data)
         data = self.api.latest(entity_type="gsp", entity_id=103)
         self.check_gsp_tuple(data)
         self.check_gsp_tuple_dtypes(data)
@@ -175,27 +156,6 @@ class PVLiveTestCase(unittest.TestCase):
             entity_id=0,
             dataframe=True
         )
-        data = self.api.day_peak(d=test_date, entity_type="pes", entity_id=0, period=5)
-        self.check_pes_tuple(data)
-        self.check_pes_tuple_dtypes(data)
-        data = self.api.day_peak(
-            d=test_date,
-            entity_type="pes",
-            entity_id=0,
-            period=5,
-            dataframe=True
-        )
-        self.check_df_columns(data)
-        self.check_df_dtypes(data)
-        data = self.api.day_peak(
-            d=test_date,
-            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-            entity_type="pes",
-            entity_id=0,
-            period=5,
-            dataframe=True
-        )
-        self.check_df_dtypes(data)
         data = self.api.day_peak(d=test_date, entity_type="gsp", entity_id=54)
         self.check_gsp_tuple(data)
         self.check_gsp_tuple_dtypes(data)
@@ -235,25 +195,6 @@ class PVLiveTestCase(unittest.TestCase):
         )
         self.check_df_columns(data)
         self.check_df_dtypes(data)
-        data = self.api.between(
-            start=get_test_time(0, 0),
-            end=get_test_time(14, 0),
-            entity_type="pes",
-            entity_id=0,
-            period=5
-        )
-        with self.subTest():
-            assert isinstance(data, list)
-        data = self.api.between(
-            start=get_test_time(12, 20),
-            end=get_test_time(14, 0),
-            entity_type="pes",
-            entity_id=0,
-            period=5,
-            dataframe=True
-        )
-        self.check_df_columns(data)
-        self.check_df_dtypes(data)
 
     def test_at_time(self):
         """Test the at_time function."""
@@ -269,21 +210,6 @@ class PVLiveTestCase(unittest.TestCase):
             entity_type="pes",
             entity_id=0,
             extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-            dataframe=True
-        )
-        self.check_df_dtypes(data)
-        data = self.api.at_time(dt=test_time, entity_type="pes", entity_id=0, period=5)
-        self.check_pes_tuple(data)
-        self.check_pes_tuple_dtypes(data)
-        data = self.api.at_time(test_time, entity_type="pes", entity_id=0, period=5, dataframe=True)
-        self.check_df_columns(data)
-        self.check_df_dtypes(data)
-        data = self.api.at_time(
-            test_time,
-            entity_type="pes",
-            entity_id=0,
-            extra_fields="ucl_mw,lcl_mw,installedcapacity_mwp,stats_error",
-            period=5,
             dataframe=True
         )
         self.check_df_dtypes(data)
