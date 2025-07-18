@@ -18,6 +18,8 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 
 ## Usage
 
+As of 2025-07-07, the production PV_Live API is hosted on Google Cloud Platform (GCP) at https://api.pvlive.uk. There is a also non-prod test/fix-on-fail (FOF) environment hosted on TUOS IT: https://api.solar.sheffield.ac.uk. To support switching between the two, the `pvlive-api` package exposes a parameter `domain_url`, which can be set to one of `["api.pvlive.uk", "api.solar.sheffield.ac.uk"]` but defaults to `api.pvlive.uk`. 
+
 There are three methods for extracting raw data from the PV_Live API:
 
 |Method|Description|Docs Link|
