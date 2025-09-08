@@ -1,5 +1,4 @@
-
-# PV_Live
+# PV_Live-API
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
 **Latest Version: 1.5.1**
@@ -18,7 +17,7 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 
 ## Usage
 
-As of 2025-07-07, the production PV_Live API is hosted on Google Cloud Platform (GCP) at https://api.pvlive.uk. There is a also non-prod test/fix-on-fail (FOF) environment hosted on TUOS IT: https://api.solar.sheffield.ac.uk. To support switching between the two, the `pvlive-api` package exposes a parameter `domain_url`, which can be set to one of `["api.pvlive.uk", "api.solar.sheffield.ac.uk"]` but defaults to `api.pvlive.uk`. 
+As of 2025-07-07, the production PV_Live API is hosted on Google Cloud Platform (GCP) at https://api.pvlive.uk. There is a also non-prod test/fix-on-fail (FOF) environment hosted on TUOS IT: https://api.solar.sheffield.ac.uk. To support switching between the two, the `pvlive-api` package exposes a parameter `domain_url`, which can be set to one of `["api.pvlive.uk", "api.solar.sheffield.ac.uk"]` but defaults to `api.pvlive.uk`.
 
 There are three methods for extracting raw data from the PV_Live API:
 
@@ -40,8 +39,8 @@ These methods include the following optional parameters:
 |Parameter|Usage|
 |---------|-----|
 |`entity_type`|Choose between `"pes"` or `"gsp"`. If querying for national data, this parameter can be set to either value (or left to it's default value) since setting `entity_id` to `0` will always return national data.|
-|`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://data.nationalgrideso.com/system/gis-boundaries-for-gb-grid-supply-points).|
-|`extra_fields`|Use this to extract additional fields from the API such as _installedcapacity_mwp_. For a full list of available fields, see the [PV_Live API Docs](https://www.solar.sheffield.ac.uk/pvlive/api/).|
+|`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://www.neso.energy/data-portal/gis-boundaries-gb-grid-supply-points).|
+|`extra_fields`|Use this to extract additional fields from the API such as _installedcapacity_mwp_. For a full list of available fields, see the [PV_Live API Docs](https://api.pvlive.uk/pvlive/docs).|
 |`period`|Set the desired temporal resolution (in minutes) for PV outturn estimates. Options are 30 (default) or 5.|
 |`dataframe`|Set `dataframe=True` and the results will be returned as a Pandas DataFrame object which is generally much easier to work with. The columns of the DataFrame will be _pes_id_ or _gsp_id_, _datetime_gmt_, _generation_mw_, plus any extra fields specified.|
 
@@ -151,7 +150,7 @@ There is also a Docker Image hosted on Docker Hub which can be used to download 
 
 ## How do I upgrade?
 
-Sheffield Solar will endeavour to update this library in sync with the [PV_Live API](https://www.solar.sheffield.ac.uk/pvlive/api/ "PV_Live API webpage") and ensure the latest version of this library always supports the latest version of the PV_Live API, but cannot guarantee this. To make sure you are forewarned of upcoming changes to the API, you should email [solar@sheffield.ac.uk](mailto:solar@sheffield.ac.uk?subject=PV_Live%20API%20email%20updates "Email Sheffield Solar") and request to be added to the PV_Live user mailing list.
+Sheffield Solar will endeavour to update this library in sync with the [PV_Live API](https://www.solar.sheffield.ac.uk/api/ "PV_Live API webpage") and ensure the latest version of this library always supports the latest version of the PV_Live API, but cannot guarantee this. To make sure you are forewarned of upcoming changes to the API, you should email [solar@sheffield.ac.uk](mailto:solar@sheffield.ac.uk?subject=PV_Live%20API%20email%20updates "Email Sheffield Solar") and request to be added to the PV_Live user mailing list.
 
 To upgrade the code:
 * Run `pip install --upgrade pvlive-api`
