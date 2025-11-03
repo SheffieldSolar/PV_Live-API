@@ -115,15 +115,6 @@ class PVLive:
             self.deployment_releases = sorted(list(self.deployment_datasets.keys()), reverse=True)
         return self.deployment_datasets, self.deployment_releases
 
-    def _get_deployment_filenames(self, release):
-        """Get a list of filenames for a given release."""
-        url = f"{self.domain_url}/capacity/{release}/"
-        response = self._fetch_url(url, parse_json=False)
-        soup = BeautifulSoup(response.content, "html.parser")
-        filenames = [r["href"] for r in soup.find_all("a", href=True)
-                     if re.match(r".+\.csv.gz", r["href"])]
-        return filenames
-
     def _validate_deployment_inputs(self, region, include_history, by_system_size, release):
         """Validate input parameters to `deployment()`."""
         deployment_datasets, releases = self._get_deployment_releases()
