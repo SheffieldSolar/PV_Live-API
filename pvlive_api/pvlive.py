@@ -96,12 +96,14 @@ class PVLive:
         """Fetch the GSP list from the API and convert to Pandas DataFrame."""
         url = f"{self.base_url}/gsp_list"
         response = self._fetch_url(url)
+        self._validate_api_response(response, expected_keys=("data", "meta"))
         return pd.DataFrame(response["data"], columns=response["meta"])
 
     def _get_pes_list(self):
         """Fetch the PES list from the API and convert to Pandas DataFrame."""
         url = f"{self.base_url}/pes_list"
         response = self._fetch_url(url)
+        self._validate_api_response(response, expected_keys=("data", "meta"))
         return pd.DataFrame(response["data"], columns=response["meta"])
 
     def _get_deployment_releases(self):
@@ -239,6 +241,7 @@ class PVLive:
                               extra_fields=extra_fields, period=period)
         params = self._compile_params(extra_fields, period=period)
         response = self._query_api(entity_type, entity_id, params)
+        self._validate_api_response(response, expected_keys=("data", "meta"))
         if response["data"]:
             data, meta = response["data"], response["meta"]
             data = tuple(data[0])
@@ -455,11 +458,21 @@ class PVLive:
             request_end = min(end, request_start + max_range)
             params = self._compile_params(extra_fields, request_start, request_end, period)
             response = self._query_api(entity_type, entity_id, params)
+            self._validate_api_response(response, expected_keys=("data", "meta"))
             data += response["data"]
             request_start += max_range + timedelta(minutes=period)
         if dataframe:
             return self._convert_tuple_to_df(data, response["meta"]), response["meta"]
         return data, response["meta"]
+
+    @staticmethod
+    def _validate_api_response(response, expected_keys):
+        """Check that a JSON API response contains the expected keys."""
+        if any(key not in response.keys() for key in expected_keys):
+            raise PVLiveException(
+                "The API's JSON response did not contain the required fields. Expected keys: "
+                f"{expected_keys} , available keys: {response.keys()}"
+            )
 
     def _compile_params(self, extra_fields="", start=None, end=None, period=30):
         """Compile parameters into a Python dict, formatting where necessary."""
