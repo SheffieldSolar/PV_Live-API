@@ -1,3 +1,3 @@
-from pvlive_api.pvlive import PVLive
+from pvlive_api.pvlive import PVLive, PVLiveException
 
-__all__ = ["PVLive"]
+__all__ = ["PVLive", "PVLiveException"]

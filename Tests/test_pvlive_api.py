@@ -5,11 +5,12 @@ Written: 07/11/2020
 """
 
 import unittest
+from unittest.mock import MagicMock
 from datetime import datetime, date, time
 import pytz
 
 import pandas.api.types as ptypes
-from pvlive_api import PVLive
+from pvlive_api import PVLive, PVLiveException
 
 class PVLiveTestCase(unittest.TestCase):
     """Tests for `pvlive.py`."""
@@ -139,6 +140,9 @@ class PVLiveTestCase(unittest.TestCase):
         data = self.api.latest(entity_type="gsp", entity_id=103, dataframe=True)
         self.check_df_columns(data)
         self.check_df_dtypes(data)
+        self.api._fetch_url = MagicMock(return_value={"notdata": [], "notmeta": []})
+        with self.assertRaises(PVLiveException):
+            data = self.api.latest(entity_type="gsp", entity_id=0, dataframe=True)
 
     def test_day_peak(self):
         """Tests the day_peak function."""
