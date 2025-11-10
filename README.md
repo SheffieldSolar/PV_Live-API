@@ -1,7 +1,7 @@
 # PV_Live-API
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
-**Latest Version: 1.5.1**
+**Latest Version: 1.5.2**
 
 ## About this repository
 
