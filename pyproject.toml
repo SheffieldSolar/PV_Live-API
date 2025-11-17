@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pvlive_api"
-version = "1.5.1"
+version = "1.5.2"
 dynamic = ["dependencies"]
 requires-python = ">=3.11"
 authors = [
@@ -15,7 +15,7 @@ maintainers = [
 ]
 description = "A Python interface for the PV_Live web API from Sheffield Solar."
 readme = "README.md"
-#license = {file = "LICENSE.txt"}
+license = {file = "LICENSE"}
 keywords = ["solar", "pv", "pv_live", "api"]
 classifiers = [
     "Development Status :: 4 - Beta",
