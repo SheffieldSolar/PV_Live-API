@@ -15,7 +15,7 @@ maintainers = [
 ]
 description = "A Python interface for the PV_Live web API from Sheffield Solar."
 readme = "README.md"
-#license = {file = "LICENSE.txt"}
+license = {file = "LICENSE"}
 keywords = ["solar", "pv", "pv_live", "api"]
 classifiers = [
     "Development Status :: 4 - Beta",
