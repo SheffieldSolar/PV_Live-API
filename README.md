@@ -1,3 +1,4 @@
+
 # PV_Live-API
 A Python implementation of the PV_Live web API. See https://www.solar.sheffield.ac.uk/pvlive/
 
@@ -6,20 +7,52 @@ A Python implementation of the PV_Live web API. See https://www.solar.sheffield.
 ## About this repository
 
 * This Python library provides a convenient interface for the PV_Live web API to facilitate accessing PV_Live results in Python code.
-* Developed and tested with Python 3.10, should work with Python 3.7+. Support for Python 2.7+ has been discontinued as of 2021-01-15.
+* Developed and tested with Python 3.12, should work with Python 3.10+.
+
+## About PV_Live
+
+PV_Live is a service providing generation estimates for solar photovoltaic (PV) systems connected to the GB electricity network. The service, and the methodology behind it, were developed as a collaboration between the Sheffield Solar research project at The University of Sheffield and the National Energy System Operator (NESO). The service continues to be funded by NESO to ensure the data PV_Live provides can remain open and free to access.
+
+There are two PV_Live models for GB: National and Regional, both of which estimate PV generation at a half-hourly temporal resolution. The national model provides an estimate of the total generation from solar PV systems across the GB electricity network which do not participate in the Balancing Mechanism. The regional model is more geographically-resolved and provides PV generation estimates aggregated by Grid Supply Point (GSP) or DNO License Area (a.k.a PES region).
+
+The Balancing mechanism (BM) is NESO’s primary tool to balance supply and demand on GB’s electricity network. In the Electricity National Control Centre (ENCC), NESO use the BM to buy and procure the right amount of electricity required to balance the system. Participants to the BM are referred to as Balancing Mechanism Units (BMUs) - BMUs are dispatchable and also supplied operational metering directly to NESO. As such, Solar PV BMUs are excluded from the PV_Live outturn estimates, to avoid double counting. Generation data for solar BMUs can be accessed via Elexon (see "settlement metering").
+
+In the regional PV_Live data, GSPs are given arbitrary integer IDs called `gsp_id`. The corresponding name(s) for the GSPs are supplied by the `/gsp_list` API endpoint (see Code Examples below). An equivalent system is used for the PV outturns by DNO License Area - the DNO License Area outturns are identified by `pes_id`, with the string names for the DNO License Areas being supplied by the `/pes_list` API endpoint. For a full list of GSPs and PES regions, and the geographical regions they supply, refer to the GIS datasets hosted on NESO's data portal:
+
+- [GIS Boundaries for GB Grid Supply Points](https://www.neso.energy/data-portal/gis-boundaries-gb-grid-supply-points)
+- [GIS Boundaries for GB DNO License Areas](https://www.neso.energy/data-portal/gis-boundaries-gb-dno-license-areas).
 
 ## How do I get set up?
 
-* Make sure you have Git installed - [Download Git](https://git-scm.com/downloads)
 * Run either:
     * `pip install pvlive-api`
     * `pip install git+https://github.com/SheffieldSolar/PV_Live-API`
+	    * (you'll need to have Git installed for this to work - see https://git-scm.com/downloads)
+
+
+
+
+
+
 
 ## Usage
 
-As of 2025-07-07, the production PV_Live API is hosted on Google Cloud Platform (GCP) at https://api.pvlive.uk. There is a also non-prod test/fix-on-fail (FOF) environment hosted on TUOS IT: https://api.solar.sheffield.ac.uk. To support switching between the two, the `pvlive-api` package exposes a parameter `domain_url`, which can be set to one of `["api.pvlive.uk", "api.solar.sheffield.ac.uk"]` but defaults to `api.pvlive.uk`.
+As of 2025-07-07, the production PV_Live API is hosted on Google Cloud Platform (GCP) at https://api.pvlive.uk. There is also a non-prod test/fix-on-fail environment hosted on TUOS IT: https://api.solar.sheffield.ac.uk. To support switching between the two, the `pvlive-api` package exposes a parameter `domain_url`, which can be set to one of `["api.pvlive.uk", "api.solar.sheffield.ac.uk"]` but defaults to `api.pvlive.uk`.
 
-There are three methods for extracting raw data from the PV_Live API:
+You can interact with the PV_Live API by importing the PVLive class and instantiating as follows:
+
+```Python
+from pvlive_api import PVLive
+
+pvl = PVLive(
+    retries=3, # Optionally set the number of retries when intermittent issues are encountered
+    proxies=None, # Optionally pass a dict of proxies to use when making requests
+    ssl_verify=True, # Optionally disable SSL certificate verification (not advised!)
+    domain_url="api.pvlive.uk", # Optionally switch between the prod and FOF APIs
+)
+```
+
+The `PVLive` class exposes three methods for extracting raw data from the PV_Live API:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
@@ -27,7 +60,7 @@ There are three methods for extracting raw data from the PV_Live API:
 |`PVLive.at_time(dt, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the PV_Live generation result for a given time from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.at_time)|
 |`PVLive.between(start, end, entity_type="pes", entity_id=0, extra_fields="", period=30, dataframe=False)`|Get the PV_Live generation result for a given time interval from the API.|[&#128279;](https://sheffieldsolar.github.io/PV_Live-API/build/html/modules.html#pvlive_api.pvlive.PVLive.between)|
 
-There are two methods for extracting derived statistics:
+There are also two methods for extracting derived statistics:
 
 |Method|Description|Docs Link|
 |------|-----------|---------|
@@ -39,9 +72,8 @@ These methods include the following optional parameters:
 |Parameter|Usage|
 |---------|-----|
 |`entity_type`|Choose between `"pes"` or `"gsp"`. If querying for national data, this parameter can be set to either value (or left to it's default value) since setting `entity_id` to `0` will always return national data.|
-|`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_. For a full list of GSP and PES IDs, refer to the lookup table hosted on National Grid ESO's data portal [here](https://www.neso.energy/data-portal/gis-boundaries-gb-grid-supply-points).|
+|`entity_id`|Set `entity_id=0` (the default value) to return nationally aggregated data. If `entity_type="pes"`, specify a _pes_id_ to retrieve data for, else if `entity_id="gsp"`, specify a _gsp_id_.|
 |`extra_fields`|Use this to extract additional fields from the API such as _installedcapacity_mwp_. For a full list of available fields, see the [PV_Live API Docs](https://api.pvlive.uk/pvlive/docs).|
-|`period`|Set the desired temporal resolution (in minutes) for PV outturn estimates. Options are 30 (default) or 5.|
 |`dataframe`|Set `dataframe=True` and the results will be returned as a Pandas DataFrame object which is generally much easier to work with. The columns of the DataFrame will be _pes_id_ or _gsp_id_, _datetime_gmt_, _generation_mw_, plus any extra fields specified.|
 
 There is also a method for extracting PV deployment (a.k.a capacity) data:
@@ -54,22 +86,11 @@ There is also a method for extracting PV deployment (a.k.a capacity) data:
 
 See [pvlive_api_demo.py](https://github.com/SheffieldSolar/PV_Live-API/blob/master/pvlive_api_demo.py) for more example usage.
 
-The examples below assume you have imported the PVLive class and created a local instance called `pvl`:
-
-```Python
-from datetime import datetime
-import pytz
-
-from pvlive_api import PVLive
-
-pvl = PVLive()
-```
-
 |Example|Code|Example Output|
 |-------|----|------|
 |Get the latest nationally aggregated GB PV outturn|`pvl.latest()`|`(0, '2021-01-20T11:00:00Z', 203.0)`|
 |Get the latest aggregated outturn for **PES** region **23** (Yorkshire)|`pvl.latest(entity_id=23)`|`(23, '2021-01-20T14:00:00Z', 5.8833031)`
-|Get the latest aggregated outturn for **GSP** ID **120** (INDQ1 or "Indian Queens")|`pvl.latest(entity_type="gsp", entity_id=120)`|`(120, '2021-01-20T14:00:00Z', 1, 3.05604)`
+|Get the latest aggregated outturn for **GSP** ID **152** (INDQ1 or "Indian Queens")|`pvl.latest(entity_type="gsp", entity_id=152)`|`(152, '2021-01-20T14:00:00Z', 1, 3.05604)`
 |Get the nationally aggregated GB PV outturn for all of 2020 as a DataFrame|`pvl.between(start=datetime(2020, 1, 1, 0, 30, tzinfo=pytz.utc), end=datetime(2021, 1, 1, tzinfo=pytz.utc), dataframe=True)`|![Screenshot of output](https://raw.githubusercontent.com/SheffieldSolar/PV_Live-API/master/misc/code_example_output.png)|
 |Get a list of GSP IDs|`pvl.gsp_ids`|`array([  0,   1,   2,   3,   ..., 315, 316, 317])`|
 |Get a list of PES IDs|`pvl.pes_ids`|`array([  0,  10,  11,  12,   ...,  21,  22,  23])`|
@@ -84,8 +105,14 @@ def download_pvlive_by_gsp(start, end, include_national=True, extra_fields=""):
     for gsp_id in pvl.gsp_ids:
         if gsp_id < min_gsp_id:
             continue
-        data_ = pvl.between(start=start, end=end, entity_type="gsp", entity_id=gsp_id,
-                            dataframe=True, extra_fields=extra_fields)
+        data_ = pvl.between(
+            start=start,
+            end=end,
+            entity_type="gsp",
+            entity_id=gsp_id,
+            dataframe=True,
+            extra_fields=extra_fields
+        )
         if data is None:
             data = data_
         else:
@@ -146,7 +173,9 @@ There is also a Docker Image hosted on Docker Hub which can be used to download 
 
 ## Documentation
 
-* [https://sheffieldsolar.github.io/PV_Live-API/](https://sheffieldsolar.github.io/PV_Live-API/)
+API reference documentation for this Python package is available here: [https://sheffieldsolar.github.io/PV_Live-API/](https://sheffieldsolar.github.io/PV_Live-API/)
+
+Documentation for the PV_Live REST API is available here: [https://api.pvlive.uk/pvlive/docs](https://api.pvlive.uk/pvlive/docs)
 
 ## How do I upgrade?
 
@@ -183,15 +212,28 @@ In order to maintain a local copy of the PV_Live GB national outturn estimates t
 - Every day, around 11am, re-download the previous 3 days of outturns
 - Every month, re-download all historical outturns
 
+To make it easier to re-ingest historical data without duplication, PV_Live API users can request the `updated_gmt` field in the API response (by setting the `extra_fields`  parameter). The `updated_gmt` field can be used to determine if an outturn estimate has changed since the API was last polled. For example, one could treat `("gsp_id", "datetime_gmt", "updated_gmt")` as the primary key in one's own copy of the PV_Live outturns data and thereby avoid the need to re-ingest identical data. For more help designing an optimal ingestion design for PV_Live data, feel free to [contact Sheffield Solar](https://www.solar.sheffield.ac.uk/contact-us/).
+
 ## Who do I talk to?
 
-* Jamie Taylor - [jamie.taylor@sheffield.ac.uk](mailto:jamie.taylor@sheffield.ac.uk "Email Jamie") - [SheffieldSolar](https://github.com/SheffieldSolar)
+[Contact Sheffield Solar](https://www.solar.sheffield.ac.uk/contact-us/)
 
-## Authors
+The PV_Live-API package is developed and maintained by several members of the [SheffieldSolar](https://github.com/SheffieldSolar) team:
+* [Jamie Taylor](https://github.com/JamieTaylor-TUOS)
+* [Herald Olakkengil](https://github.com/Herald-TUOS)
+* [Andrew Richards](https://github.com/AndrewCRichards)
 
-* **Jamie Taylor** - [SheffieldSolar](https://github.com/SheffieldSolar)
-* **Ethan Jones** - [SheffieldSolar](https://github.com/SheffieldSolar)
+### Original Authors
+
+* [Jamie Taylor](https://github.com/JamieTaylor-TUOS)
+* [Ethan Jones](https://github.com/ejones18)
+
+## How do I contribute?
+
+You can contribute to this repo in two ways:
+- Submit an Issue [here](https://github.com/SheffieldSolar/PV_Live-API/issues) and one of the team will respond as soon as they can
+- Submit a PR [here](https://github.com/SheffieldSolar/PV_Live-API/pulls) and one of the team will review it as soon as they can
 
 ## License
 
-No license is defined yet - use at your own risk.
+The PV_Live-API Python package uses the [GNU GENERAL PUBLIC LICENSE Version 3](https://choosealicense.com/licenses/gpl-3.0/).
