@@ -203,7 +203,7 @@ Since the PV_Live model produces outturn estimates, they will never strictly spe
 - Outturns are re-computed in near-real-time every 5 minutes after the end of the half-hour for 3 hours, to allow for late arriving sample data
     - If all data ingestion pipelines are running smoothly, this does not result in any retrospective revisions
     - If some near-real-time sample data is late arriving, the outturn estimate will be revised at the next update
-- Outturns are re-computed on day+1 (typically between 10:42 and 11:00 UTC and again between 22:42 and 23:00 UTC) to make use of sample data which only becomes available on day+1
+- Outturns are re-computed on day+1 (typically between 10:42 and 11:00 UTC to make use of sample data which only becomes available on day+1
 - Historical outturns may be re-computed periodically whenever our PV deployment dataset is updated retrospectively (usually every 3 - 6 months)
 
 In order to maintain a local copy of the PV_Live GB national outturn estimates that is as in sync with our own latest/best estimates as possible, we recommend the following polling cycle:
