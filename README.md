@@ -163,14 +163,6 @@ options:
 Jamie Taylor & Ethan Jones, 2018-06-04
 ```
 
-## Using the Docker Image
-
-There is also a Docker Image hosted on Docker Hub which can be used to download data from the PV_Live API with minimal setup:
-
-```
->> docker run -it --rm sheffieldsolar/pv_live-api:<release> pv_live -h
-```
-
 ## Documentation
 
 API reference documentation for this Python package is available here: [https://sheffieldsolar.github.io/PV_Live-API/](https://sheffieldsolar.github.io/PV_Live-API/)
